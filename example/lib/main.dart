@@ -5,64 +5,26 @@ import 'package:themed/themed.dart';
 /// 1) The [Themed] package is compatible with [Theme] and [ThemeData].
 /// 2) We can use the `const` keyword.
 /// 3) An extension allows us to add a Color to a TextStyle.
-class AppColors {
-  static const primary = ColorRef('warning', Colors.blue);
-  static const accent = ColorRef('accent', Colors.blueGrey);
-  static const secondary = ColorRef('secondary', Colors.white);
-  static const regular = ColorRef('body', Colors.black);
-  static const warning = ColorRef('warning', Colors.red);
-}
 
-class AppTextStyle {
-  static const title = TextStyleRef(
-    'title',
-    TextStyle(
-      fontSize: 26,
-      fontWeight: FontWeight.w700,
-      color: AppColors.secondary,
-    ),
-  );
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  static const body = TextStyleRef(
-    'title',
-    TextStyle(
-      fontSize: 17,
-      fontWeight: FontWeight.w400,
-      color: AppColors.regular,
-    ),
-  );
+class MyTheme {
+  static const color1 = ColorRef('color1', Colors.white);
+  static const color2 = ColorRef('color2', Colors.blue);
+  static const color3 = ColorRef('color3', Colors.green);
 
-  static const number = TextStyleRef(
-    'title',
-    TextStyle(
-      fontSize: 38,
-      fontWeight: FontWeight.w600,
-      color: AppColors.warning,
-    ),
+  static const mainStyle = TextStyleRef(
+    'mainStyle',
+    TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: MyTheme.color1),
   );
 }
 
-Map<ThemeRef, Object> theme1 = {
-  AppColors.primary: Colors.pink,
-  AppColors.accent: Colors.purple,
-  AppColors.secondary: Colors.green,
-  AppColors.regular: Colors.brown,
-  AppColors.warning: Colors.red,
-  AppTextStyle.title: const TextStyle(
-    fontSize: 26 * .7,
-    fontWeight: FontWeight.w700,
-    color: Colors.green,
-  ),
-  AppTextStyle.body: const TextStyle(
-    fontSize: 17 * .7,
-    fontWeight: FontWeight.w400,
-    color: Colors.brown,
-  ),
-  AppTextStyle.number: const TextStyle(
-    fontSize: 38 * .7,
-    fontWeight: FontWeight.w600,
-    color: Colors.red,
-  ),
+Map<ThemeRef, Object> anotherTheme = {
+  MyTheme.color1: Colors.yellow,
+  MyTheme.color2: Colors.pink,
+  MyTheme.color3: Colors.purple,
+  MyTheme.mainStyle:
+      const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: MyTheme.color1),
 };
 
 void main() {
@@ -74,12 +36,14 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return Themed(
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Themed example',
         //
         // 1) The [Themed] package is compatible with [Theme] and [ThemeData]:
         theme: ThemeData(
-          primaryColor: AppColors.primary,
-          accentColor: AppColors.accent,
+          primaryColor: MyTheme.color2,
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(primary: MyTheme.color2),
+          ),
         ),
         //
         home: MyHomePage(),
@@ -94,66 +58,110 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         //
         // 2) We can use the `const` keyword:
-        title: const Text('Themed example', style: AppTextStyle.title),
+        title: const Text('Themed example', style: MyTheme.mainStyle),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
+          children: [
             //
             // 2) We can use the `const` keyword:
-            const Text('You have pushed the button this many times:', style: AppTextStyle.body),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    color: MyTheme.color3,
+                    child: const Text('This is some text!', style: MyTheme.mainStyle),
+                  ),
+                  //
+                  const SizedBox(height: 30),
+                  //
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    color: MyTheme.color3,
+                    child: Text(
+                      'This is another text!',
+                      // 3) An extension allows us to add a Color to a TextStyle:
+                      style: MyTheme.mainStyle + Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
             //
-            Text('$_counter', style: AppTextStyle.number),
-            const SizedBox(height: 30),
+            Container(width: double.infinity, height: 2, color: Colors.grey),
             //
-            ElevatedButton(
-                onPressed: () {
-                  Themed.currentTheme = theme1;
-                },
-                child: const Text('Theme 1')),
-            //
-            const ElevatedButton(
-                onPressed: Themed.clearCurrentTheme, child: const Text('Default Theme')),
-            //
-            ElevatedButton(
-              onPressed: () {
-                if (Themed.ifCurrentTransformColorIs(ColorRef.shadesOfGreyTransform))
-                  Themed.clearTransformColor();
-                else
-                  Themed.transformColor = ColorRef.shadesOfGreyTransform;
-              },
-              child: Text(
-                Themed.ifCurrentTransformColorIs(ColorRef.shadesOfGreyTransform)
-                    ? 'Remove transform'
-                    : 'Shades of grey transform',
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _button1(),
+                  _button2(),
+                  _button3(),
+                ],
               ),
             ),
             //
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        //
-        // 3) An extension allows us to add a Color to a TextStyle:
-        child: Text('+', style: AppTextStyle.number + AppColors.secondary),
+    );
+  }
+
+  ElevatedButton _button1() {
+    return ElevatedButton(
+      onPressed: () {
+        if (Themed.ifCurrentThemeIs(anotherTheme))
+          Themed.clearCurrentTheme();
+        else
+          Themed.currentTheme = anotherTheme;
+      },
+      child: Text(
+        Themed.ifCurrentThemeIs(anotherTheme) ? 'Back to default theme' : 'Apply another theme',
       ),
     );
   }
+
+  ElevatedButton _button2() {
+    return ElevatedButton(
+      onPressed: () {
+        if (Themed.ifCurrentTransformColorIs(ColorRef.shadesOfGreyTransform))
+          Themed.clearTransformColor();
+        else
+          Themed.transformColor = ColorRef.shadesOfGreyTransform;
+      },
+      child: Text(
+        Themed.ifCurrentTransformColorIs(ColorRef.shadesOfGreyTransform)
+            ? 'Remove color transform'
+            : 'Shades of grey transform',
+      ),
+    );
+  }
+
+  ElevatedButton _button3() {
+    return ElevatedButton(
+      onPressed: () {
+        if (Themed.ifCurrentTransformTextStyleIs(largerText))
+          Themed.clearTransformTextStyle();
+        else
+          Themed.transformTextStyle = largerText;
+      },
+      child: Text(
+        Themed.ifCurrentTransformTextStyleIs(largerText)
+            ? 'Remove font transform'
+            : 'Larger font transform',
+      ),
+    );
+  }
+
+  static TextStyle largerText(TextStyle textStyle) =>
+      textStyle.copyWith(fontSize: textStyle.fontSize! * 1.5);
 }

@@ -15,7 +15,6 @@ import 'package:flutter/widgets.dart';
 
 extension TextStyleExtension on TextStyle {
   //
-
   /// You can create a [TextStyle] by adding the [TextStyle] to one these types:
   /// [Color], [FontFamily], [FontSize], [FontWeight], [FontStyle], [TextBaseline], [Locale],
   /// [Shadows], [FontFeatures], [Decoration], or [DecorationStyle], or [DecorationStyle].
@@ -106,12 +105,15 @@ TextStyle Function(TextStyle)? _transformTextStyle;
 
 /// Removes the current theme, falling back to the default theme.
 void _clearCurrentTheme() {
-  _currentTheme = {};
+  _currentTheme = const {};
 }
 
 /// Returns true if the given theme is equal to the current one.
 /// Note: To check if the default them is being used, do: `ifThemeIs({})`.
-bool _ifCurrentThemeIs(Map<ThemeRef, Object> theme) => mapEquals(theme, _currentTheme);
+bool _ifCurrentThemeIs(Map<ThemeRef, Object> theme) {
+  theme = toIdenticalKeyedMap(theme);
+  return mapEquals(theme, _currentTheme);
+}
 
 /// Sets a transform which will be applied to all colors.
 void _setTransformColor(Color Function(Color)? transform) {
@@ -151,7 +153,7 @@ bool _ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
 /// Note, there must at most one single `Themed` widget in the tree.
 ///
 /// ```dart
-/// import 'package:kolor_theme/kolor_theme.dart';
+/// import 'package:themed/themed.dart';
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -181,12 +183,12 @@ class Themed extends StatefulWidget {
   ///
   Themed({
     Key? key,
-    Map<ThemeRef, Object> defaultTheme = const {},
+    Map<ThemeRef, Object>? defaultTheme,
     Map<ThemeRef, Object>? currentTheme,
     required this.child,
   }) : super(key: _themedKey) {
-    _defaultTheme = defaultTheme;
-    if (currentTheme != null) _currentTheme = currentTheme;
+    _defaultTheme = toIdenticalKeyedMap(defaultTheme);
+    _currentTheme = toIdenticalKeyedMap(currentTheme);
   }
 
   /// Same as `Themed.of(context).theme = { ... };`
@@ -196,9 +198,8 @@ class Themed extends StatefulWidget {
   /// the current theme doesn't need to have all the colors, but only the ones you want to change
   /// from the default.
   static set currentTheme(Map<ThemeRef, Object>? currentTheme) {
-    _currentTheme = currentTheme ?? {};
-    // _themedKey.currentState?._rebuildAllChildren();
-    _themedKey.currentState?.setState(() {});
+    _currentTheme = toIdenticalKeyedMap(currentTheme);
+    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
   }
 
   /// Same as `Themed.of(context).clearTheme();`
@@ -206,28 +207,23 @@ class Themed extends StatefulWidget {
   /// Removes the current theme, falling back to the default theme
   static void clearCurrentTheme() {
     _clearCurrentTheme();
-    // _themedKey.currentState?._rebuildAllChildren();
-    _themedKey.currentState?.setState(() {});
+    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
   }
 
   /// Same as `Themed.of(context).defaultTheme = { ... };`
   ///
   /// The default theme must define all used colors.
-  static set defaultTheme(Map<ThemeRef, Object> defaultTheme) {
-    _defaultTheme = defaultTheme;
-    // _themedKey.currentState?._rebuildAllChildren();
-    _themedKey.currentState?.setState(() {});
+  static set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
+    _defaultTheme = toIdenticalKeyedMap(defaultTheme);
+    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
   }
 
   /// Same as `Themed.of(context).transformColor = ...;`
   ///
   /// Sets a transform which will be applied to all colors.
   static set transformColor(Color Function(Color)? transform) {
-    print('---------- Themed.transformColor ----------\n\n');
-    print('\n');
     _setTransformColor(transform);
-    // _themedKey.currentState?._rebuildAllChildren();
-    _themedKey.currentState?.setState(() {});
+    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
   }
 
   /// Same as `Themed.of(context).clearTransformColor();`
@@ -249,8 +245,7 @@ class Themed extends StatefulWidget {
   /// ```
   static set transformTextStyle(TextStyle Function(TextStyle)? transform) {
     _setTransformTextStyle(transform);
-    // _themedKey.currentState?._rebuildAllChildren();
-    _themedKey.currentState?.setState(() {});
+    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
   }
 
   /// Same as `Themed.of(context).clearTransformTextStyle();`
@@ -312,10 +307,10 @@ class _ThemedState extends State<Themed> {
   /// the current theme doesn't need to have all the colors, but only the ones you want to change
   /// from the default.
   ///
-  set currentTheme(Map<ThemeRef, Object> currentTheme) {
+  set currentTheme(Map<ThemeRef, Object>? currentTheme) {
     if (mounted)
       setState(() {
-        _currentTheme = currentTheme;
+        _currentTheme = toIdenticalKeyedMap(currentTheme);
         _rebuildAllChildren();
       });
   }
@@ -323,10 +318,10 @@ class _ThemedState extends State<Themed> {
   /// Same as `Themed.defaultTheme = { ... }`.
   ///
   /// The default theme must define all used colors.
-  set defaultTheme(Map<ThemeRef, Object> defaultTheme) {
+  set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
     if (mounted)
       setState(() {
-        _defaultTheme = defaultTheme;
+        _defaultTheme = toIdenticalKeyedMap(defaultTheme);
         _rebuildAllChildren();
       });
   }
@@ -382,13 +377,12 @@ class _ThemedState extends State<Themed> {
   bool ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
       _ifCurrentTransformTextStyleIs(transform);
 
+  /// Each time widget is rebuild it will try to recreate its tree.
   @override
   Widget build(BuildContext context) {
-    // print('---------- _ThemedState.build ----------1\n\n');
-    // print('---------- _ThemedState.build ----------2\n\n');
-    _rebuildAllChildrenX();
-
+    _rebuildAllChildren();
     return _InheritedConstTheme(
+      key: ValueKey<Object>(Object()), // ignore: prefer_const_constructors
       data: this,
       child: widget.child,
     );
@@ -396,31 +390,12 @@ class _ThemedState extends State<Themed> {
 
   /// See: https://stackoverflow.com/a/58513635/3411681
   void _rebuildAllChildren() {
-    // print('---------- _ThemedState._rebuildAllChildren ----------1\n\n');
-    // print('---------- _ThemedState._rebuildAllChildren ----------2\n\n');
-    // void rebuild(Element el) {
-    //   el.markNeedsBuild();
-    //   el.visitChildren(rebuild);
-    // }
-    //
-    // (context as Element).visitChildren(rebuild);
-    //
-    // WidgetsBinding.instance!.addPostFrameCallback((_) => setState(() {}));
-  }
-
-  /// See: https://stackoverflow.com/a/58513635/3411681
-  void _rebuildAllChildrenX() {
-    // print('---------- _ThemedState._rebuildAllChildren ----------1\n\n');
-    // print('---------- _ThemedState._rebuildAllChildren ----------2\n\n');
     void rebuild(Element el) {
       el.markNeedsBuild();
       el.visitChildren(rebuild);
     }
 
     (context as Element).visitChildren(rebuild);
-
-    // setState(() {});
-    // WidgetsBinding.instance!.addPostFrameCallback((_) => setState(() {}));
   }
 }
 
@@ -465,22 +440,24 @@ class ColorRef extends Color implements ThemeRef {
   //
   final String ref;
 
-  final Color? color;
+  final Color? defaultColor;
 
-  const ColorRef(this.ref, [this.color]) : super(0);
+  const ColorRef(this.ref, [this.defaultColor]) : super(0);
 
   /// Transform that removes the colors, leaving only shades of gray.
-  /// Use it like this: `KolorTheme.setTransform(ColorRef.shadesOfGrey);`
+  /// Use it like this: `Themed.setTransform(ColorRef.shadesOfGrey);`
   static Color shadesOfGreyTransform(Color color) {
     int average = (color.red + color.green + color.blue) ~/ 3;
     return Color.fromARGB(color.alpha, average, average, average);
   }
 
+  Color get color => Color(value);
+
   @override
   int get value {
     Color? result = _currentTheme[this] as Color?;
     result ??= _defaultTheme[this] as Color?;
-    result ??= color;
+    result ??= defaultColor;
     if (result == null) throw ConstThemeException('Theme color "$ref" is not defined.');
     if (_transformColor != null) result = _transformColor!(result);
     return result.value;
@@ -489,10 +466,14 @@ class ColorRef extends Color implements ThemeRef {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      super == other && other is ColorRef && runtimeType == other.runtimeType && ref == other.ref;
+      super == other &&
+          other is ColorRef &&
+          runtimeType == other.runtimeType &&
+          ref == other.ref &&
+          defaultColor == other.defaultColor;
 
   @override
-  int get hashCode => ref.hashCode;
+  int get hashCode => super.hashCode ^ ref.hashCode ^ defaultColor.hashCode;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -500,14 +481,14 @@ class ColorRef extends Color implements ThemeRef {
 class TextStyleRef implements TextStyle, ThemeRef {
   //
   final String ref;
-  final TextStyle? textStyle;
+  final TextStyle? defaultTextStyle;
 
-  const TextStyleRef(this.ref, [this.textStyle]) : super();
+  const TextStyleRef(this.ref, [this.defaultTextStyle]) : super();
 
-  TextStyle get _ts {
+  TextStyle get textStyle {
     TextStyle? result = _currentTheme[this] as TextStyle?;
     result ??= _defaultTheme[this] as TextStyle?;
-    result ??= textStyle;
+    result ??= defaultTextStyle;
     if (result == null) throw ConstThemeException('Theme text-style "$ref" is not defined.');
     if (_transformTextStyle != null) result = _transformTextStyle!(result);
     return result;
@@ -516,13 +497,13 @@ class TextStyleRef implements TextStyle, ThemeRef {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      super == other &&
-          other is TextStyleRef &&
+      other is TextStyleRef &&
           runtimeType == other.runtimeType &&
-          ref == other.ref;
+          ref == other.ref &&
+          defaultTextStyle == other.defaultTextStyle;
 
   @override
-  int get hashCode => ref.hashCode;
+  int get hashCode => ref.hashCode ^ defaultTextStyle.hashCode;
 
   @override
   TextStyle apply({
@@ -551,7 +532,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
   }) {
-    return _ts.apply(
+    return textStyle.apply(
       color: color,
       backgroundColor: backgroundColor,
       decoration: decoration,
@@ -580,17 +561,17 @@ class TextStyleRef implements TextStyle, ThemeRef {
   }
 
   @override
-  Paint? get background => _ts.background;
+  Paint? get background => textStyle.background;
 
   @override
-  Color? get backgroundColor => _ts.backgroundColor;
+  Color? get backgroundColor => textStyle.backgroundColor;
 
   @override
-  Color? get color => _ts.color;
+  Color? get color => textStyle.color;
 
   @override
   RenderComparison compareTo(TextStyle other) {
-    return _ts.compareTo(other);
+    return textStyle.compareTo(other);
   }
 
   @override
@@ -619,7 +600,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
     double? decorationThickness,
     String? debugLabel,
   }) {
-    return _ts.copyWith(
+    return textStyle.copyWith(
       inherit: inherit,
       color: color,
       backgroundColor: backgroundColor,
@@ -648,44 +629,44 @@ class TextStyleRef implements TextStyle, ThemeRef {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
-    _ts.debugFillProperties(properties, prefix: prefix);
+    textStyle.debugFillProperties(properties, prefix: prefix);
   }
 
   @override
-  String? get debugLabel => _ts.debugLabel;
+  String? get debugLabel => textStyle.debugLabel;
 
   @override
-  TextDecoration? get decoration => _ts.decoration;
+  TextDecoration? get decoration => textStyle.decoration;
 
   @override
-  Color? get decorationColor => _ts.decorationColor;
+  Color? get decorationColor => textStyle.decorationColor;
 
   @override
-  TextDecorationStyle? get decorationStyle => _ts.decorationStyle;
+  TextDecorationStyle? get decorationStyle => textStyle.decorationStyle;
 
   @override
-  double? get decorationThickness => _ts.decorationThickness;
+  double? get decorationThickness => textStyle.decorationThickness;
 
   @override
-  String? get fontFamily => _ts.fontFamily;
+  String? get fontFamily => textStyle.fontFamily;
 
   @override
-  List<String>? get fontFamilyFallback => _ts.fontFamilyFallback;
+  List<String>? get fontFamilyFallback => textStyle.fontFamilyFallback;
 
   @override
-  List<ui.FontFeature>? get fontFeatures => _ts.fontFeatures;
+  List<ui.FontFeature>? get fontFeatures => textStyle.fontFeatures;
 
   @override
-  double? get fontSize => _ts.fontSize;
+  double? get fontSize => textStyle.fontSize;
 
   @override
-  FontStyle? get fontStyle => _ts.fontStyle;
+  FontStyle? get fontStyle => textStyle.fontStyle;
 
   @override
-  FontWeight? get fontWeight => _ts.fontWeight;
+  FontWeight? get fontWeight => textStyle.fontWeight;
 
   @override
-  Paint? get foreground => _ts.foreground;
+  Paint? get foreground => textStyle.foreground;
 
   @override
   ui.ParagraphStyle getParagraphStyle({
@@ -703,7 +684,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
     double? height,
     StrutStyle? strutStyle,
   }) {
-    return _ts.getParagraphStyle(
+    return textStyle.getParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
       textScaleFactor: textScaleFactor,
@@ -722,41 +703,41 @@ class TextStyleRef implements TextStyle, ThemeRef {
 
   @override
   ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) =>
-      _ts.getTextStyle(textScaleFactor: textScaleFactor);
+      textStyle.getTextStyle(textScaleFactor: textScaleFactor);
 
   @override
-  double? get height => _ts.height;
+  double? get height => textStyle.height;
 
   @override
-  bool get inherit => _ts.inherit;
+  bool get inherit => textStyle.inherit;
 
   @override
-  ui.TextLeadingDistribution? get leadingDistribution => _ts.leadingDistribution;
+  ui.TextLeadingDistribution? get leadingDistribution => textStyle.leadingDistribution;
 
   @override
-  double? get letterSpacing => _ts.letterSpacing;
+  double? get letterSpacing => textStyle.letterSpacing;
 
   @override
-  Locale? get locale => _ts.locale;
+  Locale? get locale => textStyle.locale;
 
   @override
-  TextStyle merge(TextStyle? other) => _ts.merge(other);
+  TextStyle merge(TextStyle? other) => textStyle.merge(other);
 
   @override
-  List<ui.Shadow>? get shadows => _ts.shadows;
+  List<ui.Shadow>? get shadows => textStyle.shadows;
 
   @override
-  TextBaseline? get textBaseline => _ts.textBaseline;
+  TextBaseline? get textBaseline => textStyle.textBaseline;
 
   @override
   DiagnosticsNode toDiagnosticsNode({String? name, DiagnosticsTreeStyle? style}) =>
-      _ts.toDiagnosticsNode(name: name, style: style);
+      textStyle.toDiagnosticsNode(name: name, style: style);
 
   @override
-  String toStringShort() => _ts.toStringShort();
+  String toStringShort() => textStyle.toStringShort();
 
   @override
-  double? get wordSpacing => _ts.wordSpacing;
+  double? get wordSpacing => textStyle.wordSpacing;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
@@ -817,6 +798,24 @@ class MaterialAccentColorSwatch extends MaterialAccentColor {
 
   @override
   int get value => primary.value;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+Map<ThemeRef, Object> toIdenticalKeyedMap(Map<ThemeRef, Object>? theme) {
+  if (theme == null)
+    return const {};
+  else {
+    // Note: We add the maps like this, because the original theme may have ThemeRef values
+    // which present our weird equality, so it may fail if we do it any other way.
+    var result = Map<ThemeRef, Object>.identity();
+    List<ThemeRef> keys = theme.keys.toList();
+    List<Object> values = theme.values.toList();
+    for (int i = 0; i < keys.length; i++) {
+      result[keys[i]] = values[i];
+    }
+    return result;
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
