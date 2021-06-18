@@ -187,8 +187,8 @@ class Themed extends StatefulWidget {
     Map<ThemeRef, Object>? currentTheme,
     required this.child,
   }) : super(key: _themedKey) {
-    _defaultTheme = toIdenticalKeyedMap(defaultTheme);
-    _currentTheme = toIdenticalKeyedMap(currentTheme);
+    if (defaultTheme != null) _defaultTheme = toIdenticalKeyedMap(defaultTheme);
+    if (currentTheme != null) _currentTheme = toIdenticalKeyedMap(currentTheme);
   }
 
   /// Same as `Themed.of(context).theme = { ... };`
