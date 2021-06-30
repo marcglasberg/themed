@@ -8,15 +8,19 @@ To convince yourself it works, please run the provided example.
 This is the easiest possible way to create and use themes:
 
 ```
+// Define a theme
 class MyTheme {
    static const someColor = ... 
    static const someStyle = ... 
 }
 
+// Use the theme
 Container(
    color: MyTheme.someColor,
-   child: const Text('Hello', style: MyTheme.someStyle)),
-)
+   child: const Text('Hello', style: MyTheme.someStyle)))
+   
+// Later, change the theme dinamically:
+Themed.currentTheme = anotherTheme;      
 ```
 
 There is no need to use `Theme.of(context)` anymore:
@@ -25,36 +29,34 @@ There is no need to use `Theme.of(context)` anymore:
 // So old-fashioned. 
 Container(
    color: Theme.of(context).primary,
-   child: Text('Hello', style: TextStyle(color: Theme.of(context).secondary)),
-)
+   child: Text('Hello', style: TextStyle(color: Theme.of(context).secondary)))
 ```
 
-Also, since `Theme.of` needs the `context`, you can NOT use it in constructors. However, the
-*themed* package has no such limitations:
+Also, since `Theme.of` needs the `context` and is not constant, you can't use it in constructors.
+However, the *themed* package has no such limitations:
 
 ```
 // The const color is the default value of an optional parameter.
 MyWidget({
     this.color = MyTheme.someColor,
   });
-
 ```
 
 ---
 
-# How to use it
+# How to use the themed package
 
 Start by defining your theme with "color references" and "text style references".
 
-The `ColorRef` class extends `Color`, and it takes a "reference" identifier which should be unique,
-and a default color. For example:
+The `ColorRef` class extends `Color`, and it takes a reference identifier which should be unique.
+You may also provide a default color:
 
 ```
 ColorRef('color1', Colors.white);
 ```
 
-The `TextStyleRef` class extends `TextStyle`, and it takes a "reference" identifier which should be
-unique, and a default style. For example:
+The `TextStyleRef` class extends `TextStyle`, and it takes a reference identifier which should be
+unique. You may also provide a default style:
 
 ```
 TextStyleRef('mainStyle', TextStyle(fontSize: 16, color: Colors.red));
@@ -71,10 +73,15 @@ class MyTheme {
 }
 ```
 
-Now you can just use these colors and styles normally, inside `Container`s, `Text`s etc.
+Now you can just use these colors and styles normally, inside `Container`s, `Text`s etc:
 
-The *themed* package is compatible with Flutter's native theme system. This means you can use it
-inside a `ThemeData` widget:
+```
+Container(color: MyTheme.color1)
+Text('Hello', style: MyTheme.mainStyle)
+```
+
+Please note, the *themed* package is compatible with Flutter's native theme system, which means you
+can use it inside a `ThemeData` widget:
 
 ```
 child: MaterialApp(
