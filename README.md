@@ -1,3 +1,5 @@
+[![pub package](https://img.shields.io/pub/v/themed.svg)](https://pub.dartlang.org/packages/themed)
+
 # themed
 
 The **themed** package lets you define a theme with **const** values, and then, by using some dark
