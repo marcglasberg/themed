@@ -77,7 +77,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(8.0),
                     color: MyTheme.color3,
                     child: const Text('This is some text!', style: MyTheme.mainStyle),
                   ),
@@ -85,7 +84,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   const SizedBox(height: 30),
                   //
                   Container(
-                    padding: const EdgeInsets.all(8.0),
                     color: MyTheme.color3,
                     child: Text(
                       'This is another text!',

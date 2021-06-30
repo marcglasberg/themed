@@ -1,7 +1,7 @@
 # themed
 
-By using some dark Dart magic, the **themed** package lets you define a theme with
-**const** values, and then go and change them dynamically anyway.
+The **themed** package lets you define a theme with **const** values, and then, by using some dark
+Dart magic, go and change them dynamically anyway.
 
 To convince yourself it works, please run the provided example.
 
@@ -22,15 +22,15 @@ Container(
 There is no need to use `Theme.of(context)` anymore:
 
 ```
-// So old-fashioned! 
+// So old-fashioned. 
 Container(
    color: Theme.of(context).primary,
    child: Text('Hello', style: TextStyle(color: Theme.of(context).secondary)),
 )
 ```
 
-Since `Theme.of` needs the `context`, you can also NOT use it in constructors. However, the *themed*
-package has no such limitations:
+Also, since `Theme.of` needs the `context`, you can NOT use it in constructors. However, the
+*themed* package has no such limitations:
 
 ```
 // The const color is the default value of an optional parameter.
@@ -44,17 +44,16 @@ MyWidget({
 
 # How to use it
 
-Start by defining your default colors and styles by using `ColorRef` instead of `Color`,
-and `TextStyleRef` instead of `TextStyle`.
+Start by defining your theme with "color references" and "text style references".
 
-The `ColorRef` extends `Color`, and it takes a "reference" identifier which should be unique, and a
-default color. For example:
+The `ColorRef` class extends `Color`, and it takes a "reference" identifier which should be unique,
+and a default color. For example:
 
 ```
 ColorRef('color1', Colors.white);
 ```
 
-The `TextStyleRef` extends `TextStyle`, and it takes a "reference" identifier which should be
+The `TextStyleRef` class extends `TextStyle`, and it takes a "reference" identifier which should be
 unique, and a default style. For example:
 
 ```
@@ -65,26 +64,29 @@ Putting it all together:
 
 ```
 class MyTheme {
-  static const color1 = ColorRef('color1', Colors.white);
-  static const color2 = ColorRef('color2', Colors.blue);
+  static const color1 = ColorRef('color1', Color(0xFFFFFFFF));
+  static const color2 = ColorRef('color2', Color(0xFF2196F3));
   static const color3 = ColorRef('color3', Colors.green);
   static const mainStyle = TextStyleRef('mainStyle', TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: AppColors.color1);  
 }
 ```
 
-Now you can just use these colors and styles normally, inside `Container`s, `Text`s etc, and even
+Now you can just use these colors and styles normally, inside `Container`s, `Text`s etc.
+
+The *themed* package is compatible with Flutter's native theme system. This means you can use it
 inside a `ThemeData` widget:
 
 ```
 child: MaterialApp(
    theme: ThemeData(
       primaryColor: MyTheme.color2,
-      elevatedButtonTheme: ElevatedButtonThemeData(style: ElevatedButton.styleFrom(primary: MyTheme.color2),
+      elevatedButtonTheme: 
+         ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(primary: MyTheme.color2),
       ),
    ),
-```
+```                   
 
-                   
 ---
 
 # Setup
@@ -97,31 +99,6 @@ Widget build(BuildContext context) {
    return Themed(
       child: MaterialApp(
         ...      
-```
-
-If you want, you may also define a **default** theme, and a **current** theme:
-
-```
-@override
-Widget build(BuildContext context) {
-   return Themed(
-      defaultTheme: { ... },
-      currentTheme: { ... },
-      child: MaterialApp(
-        ...      
-```
-
-The `defaultTheme` and `currentTheme` are simply theme maps, as explained below.
-
-When a color/style is used, it will first search it inside of the `currentTheme`.
-
-If it's not found there, it searches inside of `defaultTheme`.
-
-If it's still not found there, it uses the default color/style which was defined in the constructor.
-For example, here the default color is `white`:
-
-```
-ColorRef('color1', Colors.white);
 ```
 
 ## How to define a theme map
@@ -142,10 +119,10 @@ Map<ThemeRef, Object> theme1 = {
 At any point in your app you can just change the current theme by doing:
 
 ```
-// Then, later:
+// Setting a theme:
 Themed.currentTheme = theme1;
 
-// Then, later:
+// Setting another theme:
 Themed.currentTheme = theme2;
 
 // Removing the current theme (and falling back to the default theme):
@@ -209,13 +186,90 @@ Text('Hello', style: MyTheme.mainStyle + Colors.black);
 Text('Hello', style: MyTheme.mainStyle + FontWeight.w900 + FontSize(20.0) + TextHeight(1.2));
 ```
 
+# Const recap
+
+Please remember Dart constants point to the same memory space. In this example `colorA` and `colorB`
+represent the same variable:
+
+```
+class MyTheme {
+  static const colorA = ColorRef('colorA', Colors.white);
+  static const colorB = colorA;    
+}
+```
+
+If you later chance the color of `colorA` you are also automatically changing the color of `colorB`,
+and vice-versa. If you want to create `colorB` from `colorA` while still being able to change them
+independently, you have to create different references. For example:
+
+```
+class MyTheme {
+  static const colorA = ColorRef('colorA', Colors.white);
+  static const colorB = ColorRef('colorB', colorA);
+}
+```
+
+# Avoid circular dependencies
+
+This will led to a `StackOverflowError` error:
+
+```
+Map<ThemeRef, Object> anotherTheme = {
+   MyTheme.color1: MyTheme.color2,
+   MyTheme.color2: MyTheme.color1,
+};
+```
+
+Remember: You can have references which depend on other references, but both direct and indirect
+circular references must be avoided.
+
+# Other ways to use it
+
+If you want, you may also define a **default** theme, and a **current** theme for your app:
+
+```
+@override
+Widget build(BuildContext context) {
+   return Themed(
+      defaultTheme: { ... },
+      currentTheme: { ... },
+      child: MaterialApp(
+        ...      
+```
+
+The `defaultTheme` and `currentTheme` are both optional. They are simply theme maps, as explained
+below.
+
+When a color/style is used, it will first search it inside the `currentTheme`.
+
+If it's not found there, it searches inside of `defaultTheme`.
+
+If it's still not found there, it uses the default color/style which was defined in the constructor.
+For example, here the default color is `white`:
+
+```
+ColorRef('color1', Colors.white);
+```
+
+Please note: If you define all your colors in the `defaultTheme`, then you don't need to provide
+default values in the constructor:
+
+```
+class MyTheme {
+  static const color1 = ColorRef('color1');
+  static const color2 = ColorRef('color2');
+  static const color3 = ColorRef('color3');
+  static const mainStyle = TextStyleRef('mainStyle');  
+}
+```
+
 ---
 
 # Copyright
 
-This package is copyrighted and brought to you by <a href="https://www.parksidesecurities.com/">
-Parkside Technologies</a>, a company which is simplifying global access to US stocks.
-              
+**This package is copyrighted and brought to you by <a href="https://www.parksidesecurities.com/">
+Parkside Technologies</a>, a company which is simplifying global access to US stocks.**
+
 This package is published here with permission.
 
 Please, see the license page for more information.
