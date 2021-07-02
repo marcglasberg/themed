@@ -5,16 +5,14 @@
 The **themed** package lets you define a theme with **const** values, and then, by using some dark
 Dart magic, go and change them dynamically anyway.
 
-To convince yourself it works, please run the provided example.
-
-This is the easiest possible way to create and use themes:
+Using const variables is the easiest way to create and use themes:
 
 ```
 // Define colors and styles.
 static const myColor = ColorRef(Colors.white); 
 static const myStyle = TextStyleRef(TextStyle(fontSize: 16, color: Colors.red)); 
 
-// Use them .
+// Use them.
 Container(
    color: myColor,
    child: const Text('Hello', style: myStyle)))
@@ -26,7 +24,7 @@ Themed.currentTheme = {
 }      
 ```
 
-![](https://github.com/marcglasberg/themed/blob/master/example/lib/images/themed.png)
+![](https://raw.githubusercontent.com/marcglasberg/themed/master/example/lib/images/themed.png)
 
 There is no need to use `Theme.of(context)` anymore:
 
