@@ -9,12 +9,11 @@ import 'package:themed/themed.dart';
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class MyTheme {
-  static const color1 = ColorRef('color1', Colors.white);
-  static const color2 = ColorRef('color2', Colors.blue);
-  static const color3 = ColorRef('color3', Colors.green);
+  static const color1 = ColorRef(Colors.white);
+  static const color2 = ColorRef(Colors.blue);
+  static const color3 = ColorRef(Colors.green);
 
   static const mainStyle = TextStyleRef(
-    'mainStyle',
     TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: MyTheme.color1),
   );
 }

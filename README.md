@@ -10,20 +10,23 @@ To convince yourself it works, please run the provided example.
 This is the easiest possible way to create and use themes:
 
 ```
-// Define a theme
-class MyTheme {
-   static const someColor = ... 
-   static const someStyle = ... 
-}
+// Define colors and styles.
+static const myColor = ColorRef(Colors.white); 
+static const myStyle = TextStyleRef(TextStyle(fontSize: 16, color: Colors.red)); 
 
-// Use the theme
+// Use them .
 Container(
-   color: MyTheme.someColor,
-   child: const Text('Hello', style: MyTheme.someStyle)))
+   color: myColor,
+   child: const Text('Hello', style: myStyle)))
    
-// Later, change the theme dinamically:
-Themed.currentTheme = anotherTheme;      
+// Later, change the theme dinamically.
+Themed.currentTheme = {
+   mycolor: Colors.blue,
+   myStyle: TextStyle(fontSize: 20, color: Colors.green));
+}      
 ```
+
+![](https://github.com/marcglasberg/themed/blob/master/example/lib/images/themed.png)
 
 There is no need to use `Theme.of(context)` anymore:
 
@@ -40,61 +43,24 @@ However, the *themed* package has no such limitations:
 ```
 // The const color is the default value of an optional parameter.
 MyWidget({
-    this.color = MyTheme.someColor,
+    this.color = myColor,
   });
 ```
 
----
-
-# How to use the themed package
-
-Start by defining your theme with "color references" and "text style references".
-
-The `ColorRef` class extends `Color`, and it takes a reference identifier which should be unique.
-You may also provide a default color:
+You can also organize your theme in a class:
 
 ```
-ColorRef('color1', Colors.white);
-```
-
-The `TextStyleRef` class extends `TextStyle`, and it takes a reference identifier which should be
-unique. You may also provide a default style:
-
-```
-TextStyleRef('mainStyle', TextStyle(fontSize: 16, color: Colors.red));
-```
-
-Putting it all together:
-
-```
+// Define a theme class.
 class MyTheme {
-  static const color1 = ColorRef('color1', Color(0xFFFFFFFF));
-  static const color2 = ColorRef('color2', Color(0xFF2196F3));
-  static const color3 = ColorRef('color3', Colors.green);
-  static const mainStyle = TextStyleRef('mainStyle', TextStyle(fontSize: 16, fontWeight: FontWeight.w400, color: AppColors.color1);  
+   static const myColor = ColorRef(Colors.white); 
+   static const myStyle = TextStyleRef('mainStyle', TextStyle(fontSize: 16, color: Colors.red)); 
 }
-```
 
-Now you can just use these colors and styles normally, inside `Container`s, `Text`s etc:
-
+// Use it.
+Container(
+   color: MyTheme.myColor,
+   child: const Text('Hello', style: MyTheme.myStyle)))    
 ```
-Container(color: MyTheme.color1)
-Text('Hello', style: MyTheme.mainStyle)
-```
-
-Please note, the *themed* package is compatible with Flutter's native theme system, which means you
-can use it inside a `ThemeData` widget:
-
-```
-child: MaterialApp(
-   theme: ThemeData(
-      primaryColor: MyTheme.color2,
-      elevatedButtonTheme: 
-         ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(primary: MyTheme.color2),
-      ),
-   ),
-```                   
 
 ---
 
@@ -110,11 +76,27 @@ Widget build(BuildContext context) {
         ...      
 ```
 
+# Compatibility
+
+The *themed* package is compatible with Flutter's native theme system, which means you can use it
+inside a `ThemeData` widget:
+
+```
+child: MaterialApp(
+   theme: ThemeData(
+      primaryColor: MyTheme.color2,
+      elevatedButtonTheme: 
+         ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(primary: MyTheme.color2),
+      ),
+   ),
+```                   
+
 ## How to define a theme map
 
-Each theme should be a `Map<ThemeRef, Object>`, where the keys are your `ColorRef`
-and `TextStyleRef` const values, and the values are the colors and styles you want to use on that
-theme. For example:
+Each theme should be a `Map<ThemeRef, Object>`, where the **keys** are your `ColorRef`
+and `TextStyleRef` const values, and the **values** are the colors and styles you want to use on
+that theme. For example:
 
 ```
 Map<ThemeRef, Object> theme1 = {
@@ -143,8 +125,8 @@ Themed.currentTheme = null;
 
 # Color transform
 
-Instead of changing the current theme you can create a color transformation. For example, this will
-turn your theme into shades of grey:
+Instead of changing the current theme you can create a **color transformation**. For example, this
+will turn your theme into shades of grey:
 
 ```
 static Color shadesOfGreyTransform(Color color) {
@@ -166,7 +148,7 @@ Themed.clearTransformColor();
 
 # TextStyle transform
 
-You can also create on a style transformation. For example, this will make your fonts larger:
+You can also create a **style transformation**. For example, this will make your fonts larger:
 
 ```
 static TextStyle largerText(TextStyle textStyle) =>
@@ -195,32 +177,36 @@ Text('Hello', style: MyTheme.mainStyle + Colors.black);
 Text('Hello', style: MyTheme.mainStyle + FontWeight.w900 + FontSize(20.0) + TextHeight(1.2));
 ```
 
-# Const recap
+# Beware not to define the same constant
 
-Please remember Dart constants point to the same memory space. In this example `colorA` and `colorB`
-represent the same variable:
+Please remember Dart constants point to the same memory space. In this example, `colorA`, `colorB`
+and `colorC` represent the same variable:
 
 ```
 class MyTheme {
-  static const colorA = ColorRef('colorA', Colors.white);
-  static const colorB = colorA;    
+  static const colorA = ColorRef(Colors.white);
+  static const colorB = ColorRef(Colors.white);
+  static const colorC = colorA;    
 }
 ```
 
-If you later chance the color of `colorA` you are also automatically changing the color of `colorB`,
-and vice-versa. If you want to create `colorB` from `colorA` while still being able to change them
-independently, you have to create different references. For example:
+If you later change the color of `colorA`, you are also automatically changing the color of `colorB`
+and `colorB`.
+
+If you want to create 3 independent colors, and be able to change them independently, you have to
+create different constants. You can provide an `id` string, just to differentiate them. For example:
 
 ```
 class MyTheme {
-  static const colorA = ColorRef('colorA', Colors.white);
-  static const colorB = ColorRef('colorB', colorA);
+  static const colorA = ColorRef(Colors.white, id:'A');
+  static const colorB = ColorRef(Colors.white, id:'B');
+  static const colorB = ColorRef(colorA, id:'C');
 }
 ```
 
 # Avoid circular dependencies
 
-This will led to a `StackOverflowError` error:
+The following will lead to a `StackOverflowError` error:
 
 ```
 Map<ThemeRef, Object> anotherTheme = {
@@ -229,7 +215,7 @@ Map<ThemeRef, Object> anotherTheme = {
 };
 ```
 
-Remember: You can have references which depend on other references, but both direct and indirect
+You can have references which depend on other references, no problem. But both direct and indirect
 circular references must be avoided.
 
 # Other ways to use it
@@ -254,21 +240,17 @@ When a color/style is used, it will first search it inside the `currentTheme`.
 If it's not found there, it searches inside of `defaultTheme`.
 
 If it's still not found there, it uses the default color/style which was defined in the constructor.
-For example, here the default color is `white`:
-
-```
-ColorRef('color1', Colors.white);
-```
+For example, here the default color is white: `ColorRef(Colors.white)`.
 
 Please note: If you define all your colors in the `defaultTheme`, then you don't need to provide
-default values in the constructor:
+default values in the constructor. You can then use the `fromId` constructor:
 
 ```
 class MyTheme {
-  static const color1 = ColorRef('color1');
-  static const color2 = ColorRef('color2');
-  static const color3 = ColorRef('color3');
-  static const mainStyle = TextStyleRef('mainStyle');  
+  static const color1 = ColorRef.fromId('c1');
+  static const color2 = ColorRef.fromId('c2');
+  static const color3 = ColorRef.fromId('c3');
+  static const mainStyle = TextStyleRef.fromId('mainStyle');  
 }
 ```
 
@@ -302,4 +284,11 @@ Please, see the license page for more information.
 * <a href="https://pub.dev/packages/assorted_layout_widgets">assorted_layout_widgets</a>
 * <a href="https://pub.dev/packages/weak_map">weak_map</a>
 * <a href="https://pub.dev/packages/fast_immutable_collections">fast_immutable_collections</a>
+
+
+
+
+
+
+
 

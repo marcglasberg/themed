@@ -438,11 +438,16 @@ class ConstThemeException {
 
 class ColorRef extends Color implements ThemeRef {
   //
-  final String ref;
+  final String? id;
 
   final Color? defaultColor;
 
-  const ColorRef(this.ref, [this.defaultColor]) : super(0);
+  const ColorRef(this.defaultColor, {this.id}) : super(0);
+
+  const ColorRef.fromId(String id)
+      : id = id,
+        defaultColor = null,
+        super(0);
 
   /// Transform that removes the colors, leaving only shades of gray.
   /// Use it like this: `Themed.setTransform(ColorRef.shadesOfGrey);`
@@ -458,7 +463,7 @@ class ColorRef extends Color implements ThemeRef {
     Color? result = _currentTheme[this] as Color?;
     result ??= _defaultTheme[this] as Color?;
     result ??= defaultColor;
-    if (result == null) throw ConstThemeException('Theme color "$ref" is not defined.');
+    if (result == null) throw ConstThemeException('Theme color "$id" is not defined.');
     if (_transformColor != null) result = _transformColor!(result);
     return result.value;
   }
@@ -469,27 +474,32 @@ class ColorRef extends Color implements ThemeRef {
       super == other &&
           other is ColorRef &&
           runtimeType == other.runtimeType &&
-          ref == other.ref &&
+          id == other.id &&
           defaultColor == other.defaultColor;
 
   @override
-  int get hashCode => super.hashCode ^ ref.hashCode ^ defaultColor.hashCode;
+  int get hashCode => super.hashCode ^ id.hashCode ^ defaultColor.hashCode;
 }
 
 // ////////////////////////////////////////////////////////////////////////////
 
 class TextStyleRef implements TextStyle, ThemeRef {
   //
-  final String ref;
+  final String? id;
   final TextStyle? defaultTextStyle;
 
-  const TextStyleRef(this.ref, [this.defaultTextStyle]) : super();
+  const TextStyleRef(this.defaultTextStyle, {this.id}) : super();
+
+  const TextStyleRef.fromId(String id)
+      : id = id,
+        defaultTextStyle = null,
+        super();
 
   TextStyle get textStyle {
     TextStyle? result = _currentTheme[this] as TextStyle?;
     result ??= _defaultTheme[this] as TextStyle?;
     result ??= defaultTextStyle;
-    if (result == null) throw ConstThemeException('Theme text-style "$ref" is not defined.');
+    if (result == null) throw ConstThemeException('Theme text-style "$id" is not defined.');
     if (_transformTextStyle != null) result = _transformTextStyle!(result);
     return result;
   }
@@ -499,11 +509,11 @@ class TextStyleRef implements TextStyle, ThemeRef {
       identical(this, other) ||
       other is TextStyleRef &&
           runtimeType == other.runtimeType &&
-          ref == other.ref &&
+          id == other.id &&
           defaultTextStyle == other.defaultTextStyle;
 
   @override
-  int get hashCode => ref.hashCode ^ defaultTextStyle.hashCode;
+  int get hashCode => id.hashCode ^ defaultTextStyle.hashCode;
 
   @override
   TextStyle apply({
