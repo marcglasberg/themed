@@ -19,7 +19,7 @@ Container(
    
 // Later, change the theme dinamically.
 Themed.currentTheme = {
-   mycolor: Colors.blue,
+   myColor: Colors.blue,
    myStyle: TextStyle(fontSize: 20, color: Colors.green));
 }      
 ```
