@@ -191,6 +191,12 @@ class Themed extends StatefulWidget {
     if (currentTheme != null) _currentTheme = toIdenticalKeyedMap(currentTheme);
   }
 
+  static void _setState() {
+    if (WidgetsBinding.instance != null) {
+      _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
+    }
+  }
+
   /// Same as `Themed.of(context).theme = { ... };`
   ///
   /// The current theme overrides the default theme. If a color is present in the current theme, it
@@ -199,7 +205,7 @@ class Themed extends StatefulWidget {
   /// from the default.
   static set currentTheme(Map<ThemeRef, Object>? currentTheme) {
     _currentTheme = toIdenticalKeyedMap(currentTheme);
-    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
+    _setState();
   }
 
   /// Same as `Themed.of(context).clearTheme();`
@@ -207,7 +213,7 @@ class Themed extends StatefulWidget {
   /// Removes the current theme, falling back to the default theme
   static void clearCurrentTheme() {
     _clearCurrentTheme();
-    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
+    _setState();
   }
 
   /// Same as `Themed.of(context).defaultTheme = { ... };`
@@ -215,7 +221,7 @@ class Themed extends StatefulWidget {
   /// The default theme must define all used colors.
   static set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
     _defaultTheme = toIdenticalKeyedMap(defaultTheme);
-    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
+    _setState();
   }
 
   /// Same as `Themed.of(context).transformColor = ...;`
@@ -223,7 +229,7 @@ class Themed extends StatefulWidget {
   /// Sets a transform which will be applied to all colors.
   static set transformColor(Color Function(Color)? transform) {
     _setTransformColor(transform);
-    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
+    _setState();
   }
 
   /// Same as `Themed.of(context).clearTransformColor();`
@@ -245,7 +251,7 @@ class Themed extends StatefulWidget {
   /// ```
   static set transformTextStyle(TextStyle Function(TextStyle)? transform) {
     _setTransformTextStyle(transform);
-    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
+    _setState();
   }
 
   /// Same as `Themed.of(context).clearTransformTextStyle();`
