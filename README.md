@@ -10,17 +10,17 @@ Using const variables is the easiest way to create and use themes:
 ```
 // Define colors and styles.
 static const myColor = ColorRef(Colors.white); 
-static const myStyle = TextStyleRef(TextStyle(fontSize: 16, color: Colors.red)); 
+static const myStyle = TextStyleRef(TextStyle(fontSize: 16)); 
 
 // Use them.
 Container(
    color: myColor,
    child: const Text('Hello', style: myStyle)))
    
-// Later, change the theme dinamically.
+// Later, change the theme dynamically.
 Themed.currentTheme = {
    myColor: Colors.blue,
-   myStyle: TextStyle(fontSize: 20, color: Colors.green));
+   myStyle: TextStyle(fontSize: 20);
 }      
 ```
 
@@ -51,7 +51,7 @@ You can also organize your theme in a class:
 // Define a theme class.
 class MyTheme {
    static const myColor = ColorRef(Colors.white); 
-   static const myStyle = TextStyleRef('mainStyle', TextStyle(fontSize: 16, color: Colors.red)); 
+   static const myStyle = TextStyleRef(TextStyle(fontSize: 16, color: Colors.red)); 
 }
 
 // Use it.

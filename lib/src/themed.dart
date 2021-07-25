@@ -46,18 +46,8 @@ extension TextStyleExtension on TextStyle {
               height: obj is TextHeight ? obj.height : null,
             );
 
-  /// You can create a [TextStyle] by adding the [TextStyle] to one these types:
-  /// [Color], [FontFamily], [FontSize], [FontWeight], [FontStyle], [TextBaseline], [Locale],
-  /// [Shadows], [FontFeatures], [Decoration], or [DecorationStyle], or [DecorationStyle].
-  ///
-  /// For example:
-  ///
-  /// ```
-  /// Text('Hello', style: TextStyle(fontSize: 14.0) + "Roboto" + Colors.red + FontStyle.italic);
-  /// ```
-  ///
-  /// Note: If you add null, that's not an error. It will simply return the same TextStyle.
-  /// However, if you add an invalid type it will throw an error in RUN TIME.
+  /// Instead of using [operator +] you can use the [add] method.
+  /// If [apply] is false, the provided [obj] will not be added.
   ///
   TextStyle add(Object? obj, {bool apply = true}) => (apply) ? this + obj : this;
 }
