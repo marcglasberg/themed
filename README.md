@@ -5,14 +5,24 @@
 The **themed** package lets you define a theme with **const** values, and then, by using some dark
 Dart magic, go and change them dynamically anyway.
 
-Using const variables is the easiest way to create and use themes:
+As we all know, using const variables is the easiest way to create and use themes:
 
 ```
-// Define colors and styles.
+static const myColor = Colors.white;
+static const myStyle = TextStyle(fontSize: 16);
+
+Container(
+  color: myColor,
+  child: const Text('Hi', style: myStyle)))
+```
+
+However, if you do it like that you can't later change the theme dynamically. By using the
+**themed** package you can:
+
+```
 static const myColor = ColorRef(Colors.white); 
 static const myStyle = TextStyleRef(TextStyle(fontSize: 16)); 
 
-// Use them.
 Container(
    color: myColor,
    child: const Text('Hello', style: myStyle)))
@@ -43,21 +53,6 @@ However, the *themed* package has no such limitations:
 MyWidget({
     this.color = myColor,
   });
-```
-
-You can also organize your theme in a class:
-
-```
-// Define a theme class.
-class MyTheme {
-   static const myColor = ColorRef(Colors.white); 
-   static const myStyle = TextStyleRef(TextStyle(fontSize: 16, color: Colors.red)); 
-}
-
-// Use it.
-Container(
-   color: MyTheme.myColor,
-   child: const Text('Hello', style: MyTheme.myStyle)))    
 ```
 
 ---
@@ -121,6 +116,21 @@ Themed.clearCurrentTheme();
 Themed.currentTheme = null;
 ```
 
+# Organization
+
+You can also organize your theme in a class:
+
+```
+class MyTheme {
+   static const myColor = ColorRef(Colors.white); 
+   static const myStyle = TextStyleRef(TextStyle(fontSize: 16, color: Colors.red)); 
+}
+
+Container(
+   color: MyTheme.myColor,
+   child: const Text('Hello', style: MyTheme.myStyle)))    
+```
+
 # Color transform
 
 Instead of changing the current theme you can create a **color transformation**. For example, this
@@ -165,14 +175,16 @@ With the provided extension, you can make your code more clean-code by creating 
 adding colors and other values to a `TextStyle`. For example:
 
 ```
+const myStyle = TextStyle(...);
+
 // Using some style:
-Text('Hello', style: MyTheme.mainStyle);
+Text('Hello', style: myStyle);
 
 // Making text black:
-Text('Hello', style: MyTheme.mainStyle + Colors.black);
+Text('Hello', style: myStyle + Colors.black);
 
-// Changing a lot of other stuff:
-Text('Hello', style: MyTheme.mainStyle + FontWeight.w900 + FontSize(20.0) + TextHeight(1.2));
+// Changing some other stuff:
+Text('Hello', style: myStyle + FontWeight.w900 + FontSize(20.0) + TextHeight(1.2));
 ```
 
 # Beware not to define the same constant
