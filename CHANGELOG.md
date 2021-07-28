@@ -1,4 +1,4 @@
-## [2.0.3] - 2021/07/25
+## [2.0.4] - 2021/07/28
 
 * Docs improvements.
 * Small improvement for helping with tests.

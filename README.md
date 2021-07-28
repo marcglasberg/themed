@@ -2,7 +2,7 @@
 
 # themed
 
-The **themed** package lets you define a theme with **const** values, and then, by using some dark
+The **Themed** package lets you define a theme with **const** values, and then, by using some dark
 Dart magic, go and change them dynamically anyway.
 
 As we all know, using const variables is the easiest way to create and use themes:
@@ -17,7 +17,7 @@ Container(
 ```
 
 However, if you do it like that you can't later change the theme dynamically. By using the
-**themed** package you can:
+**Themed** package you can:
 
 ```
 static const myColor = ColorRef(Colors.white); 
@@ -46,7 +46,7 @@ Container(
 ```
 
 Also, since `Theme.of` needs the `context` and is not constant, you can't use it in constructors.
-However, the *themed* package has no such limitations:
+However, the *Themed* package has no such limitations:
 
 ```
 // The const color is the default value of an optional parameter.
@@ -71,10 +71,18 @@ Widget build(BuildContext context) {
 
 # Compatibility
 
-The *themed* package is compatible with Flutter's native theme system, which means you can use it
+The *Themed* package is a competitor to writing `Theme.of(context).xxx` in your build methods, but
+it’s *NOT* a competitor to Flutter’s native theme system and the `Theme` widget. It’s there to solve
+a different problem, and it’s usually used together with the `Theme` widget. For example, if you
+want to set a global default color for all buttons, you’ll use the `Theme` widget. You may use it
+together with the `Themed` package however, meaning that `Themed` colors and styles may be used
 inside a `ThemeData` widget:
 
 ```
+static const myColor1 = ColorRef(Colors.red);
+static const myColor2 = ColorRef(Colors.blue);
+...
+
 child: MaterialApp(
    theme: ThemeData(
       primaryColor: MyTheme.color2,
