@@ -440,9 +440,8 @@ class ColorRef extends Color implements ThemeRef {
 
   const ColorRef(this.defaultColor, {this.id}) : super(0);
 
-  const ColorRef.fromId(String id)
-      : id = id,
-        defaultColor = null,
+  const ColorRef.fromId(this.id)
+      : defaultColor = null,
         super(0);
 
   /// Transform that removes the colors, leaving only shades of gray.
@@ -486,9 +485,8 @@ class TextStyleRef implements TextStyle, ThemeRef {
 
   const TextStyleRef(this.defaultTextStyle, {this.id}) : super();
 
-  const TextStyleRef.fromId(String id)
-      : id = id,
-        defaultTextStyle = null,
+  const TextStyleRef.fromId(this.id)
+      : defaultTextStyle = null,
         super();
 
   TextStyle get textStyle {
@@ -537,6 +535,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    TextOverflow? overflow,
   }) {
     return textStyle.apply(
       color: color,
@@ -563,6 +562,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
       locale: locale,
       shadows: shadows,
       fontFeatures: fontFeatures,
+      overflow: overflow,
     );
   }
 
@@ -605,6 +605,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
     TextDecorationStyle? decorationStyle,
     double? decorationThickness,
     String? debugLabel,
+    TextOverflow? overflow,
   }) {
     return textStyle.copyWith(
       inherit: inherit,
@@ -630,6 +631,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
       decorationStyle: decorationStyle,
       decorationThickness: decorationThickness,
       debugLabel: debugLabel,
+      overflow: overflow,
     );
   }
 
@@ -744,6 +746,9 @@ class TextStyleRef implements TextStyle, ThemeRef {
 
   @override
   double? get wordSpacing => textStyle.wordSpacing;
+
+  @override
+  TextOverflow? get overflow => textStyle.overflow;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
