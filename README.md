@@ -298,7 +298,8 @@ Themed.setThemeByKey(Keys.light);
 Themed.save(key: Keys.light, theme: { ... })
 ```
 
-Note: You can also use the method  `clearSavedThemeByKey` to remove saved themes.
+Note: You can also use the methods `saveAll` to save many themes by key at the same time,
+and `clearSavedThemeByKey` to remove saved themes.
 
 Important: When I say "save" above, I mean it's saved in memory, not in the device disk.
 
@@ -332,11 +333,3 @@ Please, see the license page for more information.
 * <a href="https://pub.dev/packages/assorted_layout_widgets">assorted_layout_widgets</a>
 * <a href="https://pub.dev/packages/weak_map">weak_map</a>
 * <a href="https://pub.dev/packages/fast_immutable_collections">fast_immutable_collections</a>
-
-
-
-
-
-
-
-

@@ -231,6 +231,23 @@ class Themed extends StatefulWidget {
     }
   }
 
+  /// Saves a map of themes by key. Example:
+  ///
+  /// ```
+  /// final Map<Key, Map<ThemeRef, Object>> myThemes = {
+  ///   Keys.light: lightTheme,
+  ///   Keys.dark: darkTheme,
+  /// };
+  ///
+  /// Themed.saveAll(myThemes);
+  /// ```
+  ///
+  /// See [setThemeByKey] to understand how to use the saved themes.
+  ///
+  static void saveAll(Map<dynamic, Map<ThemeRef, Object>> themesByKey) {
+    themesByKey.forEach((key, value) => Themed.save(key: key, theme: value));
+  }
+
   /// If you call [setThemeByKey] with a [key], and a theme was previously saved with that [key]
   /// (by using the [save] method), then the current theme will immediately change into that theme.
   ///
