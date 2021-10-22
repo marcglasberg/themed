@@ -540,7 +540,7 @@ class ColorRef extends Color implements ThemeRef {
           defaultColor == other.defaultColor;
 
   @override
-  int get hashCode => super.hashCode ^ id.hashCode ^ defaultColor.hashCode;
+  int get hashCode => id.hashCode ^ defaultColor.hashCode;
 }
 
 // ////////////////////////////////////////////////////////////////////////////
