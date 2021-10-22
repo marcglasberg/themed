@@ -272,6 +272,36 @@ class MyTheme {
 }
 ```
 
+## Saving and setting Themes by key
+
+You can save themes with keys, and then later use the keys to set the theme. The keys can be
+anything (Strings, enums etc.):
+
+```
+// Save some themes using keys.
+enum Keys {light, dark};
+Themed.save(key: Keys.light, theme: { ... })
+Themed.save(key: Keys.dark, theme: { ... })
+
+// Then set the theme.
+Themed.setThemeByKey(Keys.light);
+```
+
+It also works the other way around:
+If you use the key first, and only save a theme with that key later:
+
+```
+// Set the theme with a key, even before saving the theme.
+Themed.setThemeByKey(Keys.light);
+
+// The theme will change as soon as you save a theme with that key.
+Themed.save(key: Keys.light, theme: { ... })
+```
+
+Note: You can also use the method  `clearSavedThemeByKey` to remove saved themes.
+
+Important: When I say "save" above, I mean it's saved in memory, not in the device disk.
+
 ---
 
 # Copyright

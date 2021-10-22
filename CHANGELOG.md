@@ -1,3 +1,7 @@
+## [2.1.0] - 2021/10/22
+
+* Saving and setting themes by key.
+
 ## [2.0.5] - 2021/09/20
 
 * Compatible with Flutter 2.5.

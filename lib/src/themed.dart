@@ -95,6 +95,7 @@ TextStyle Function(TextStyle)? _transformTextStyle;
 
 /// Removes the current theme, falling back to the default theme.
 void _clearCurrentTheme() {
+  Themed._delayedThemeChangeByKey = null;
   _currentTheme = const {};
 }
 
@@ -167,6 +168,10 @@ class Themed extends StatefulWidget {
 
   final Widget child;
 
+  /// Saved themes.
+  static final Map<Object, Map<ThemeRef, Object>> _saved = {};
+  static Object? _delayedThemeChangeByKey;
+
   /// The [Themed] widget should wrap the [child] which contains the tree of
   /// widgets you want to use the color theme. It' recommended that you provide a
   /// [defaultTheme].
@@ -187,13 +192,14 @@ class Themed extends StatefulWidget {
     }
   }
 
-  /// Same as `Themed.of(context).theme = { ... };`
+  /// Same as `Themed.of(context).currentTheme = { ... };`
   ///
   /// The current theme overrides the default theme. If a color is present in the current theme, it
   /// will be used. If not, the color from the default theme will be used instead. For this reason,
   /// the current theme doesn't need to have all the colors, but only the ones you want to change
   /// from the default.
   static set currentTheme(Map<ThemeRef, Object>? currentTheme) {
+    _delayedThemeChangeByKey = null;
     _currentTheme = toIdenticalKeyedMap(currentTheme);
     _setState();
   }
@@ -212,6 +218,49 @@ class Themed extends StatefulWidget {
   static set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
     _defaultTheme = toIdenticalKeyedMap(defaultTheme);
     _setState();
+  }
+
+  /// Saves a [theme] with a [key].
+  /// See [setThemeByKey] to understand how to use the saved theme.
+  ///
+  static void save({required Object key, required Map<ThemeRef, Object> theme}) {
+    _saved[key] = theme;
+    if (_delayedThemeChangeByKey == key) {
+      _delayedThemeChangeByKey = null;
+      currentTheme = theme;
+    }
+  }
+
+  /// If you call [setThemeByKey] with a [key], and a theme was previously saved with that [key]
+  /// (by using the [save] method), then the current theme will immediately change into that theme.
+  ///
+  /// However, if a theme was NOT previously saved with that [key], then the current theme will
+  /// not change immediately, but may change later, as soon as you save a theme with that [key].
+  ///
+  /// In other words, you can first save a them then set it,
+  /// or you can first set it and then save it.
+  ///
+  static void setThemeByKey(Object key) {
+    var theme = _saved[key];
+    if (theme == null)
+      _delayedThemeChangeByKey = key;
+    else {
+      _delayedThemeChangeByKey = null;
+      currentTheme = _saved[key];
+    }
+  }
+
+  /// Removes all saved themes.
+  /// Or, to remove just a specific saved theme, pass its [key].
+  /// Note: This will not change the current theme.
+  static void clearSavedThemeByKey([Object? key]) {
+    if (key != null) {
+      _saved.remove(key);
+      if (_delayedThemeChangeByKey == key) _delayedThemeChangeByKey = null;
+    } else {
+      _delayedThemeChangeByKey = null;
+      _saved.clear();
+    }
   }
 
   /// Same as `Themed.of(context).transformColor = ...;`
@@ -304,6 +353,7 @@ class _ThemedState extends State<Themed> {
   /// from the default.
   ///
   set currentTheme(Map<ThemeRef, Object>? currentTheme) {
+    Themed._delayedThemeChangeByKey = null;
     if (mounted)
       setState(() {
         _currentTheme = toIdenticalKeyedMap(currentTheme);
