@@ -1,3 +1,7 @@
+## [2.2.0] - 2021/10/23
+
+* Improved `ColorRef.toString()` and `TextStyleRef.toString()` methods.
+
 ## [2.1.0] - 2021/10/22
 
 * Saving and setting themes by key: `Themed.save()`, `Themed.setThemeByKey()` etc.

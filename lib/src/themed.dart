@@ -531,6 +531,24 @@ class ColorRef extends Color implements ThemeRef {
   }
 
   @override
+  String toString() => 'ColorRef('
+      '0x${value.toRadixString(16).padLeft(8, '0')}${id == null ? "" : ", id: $id"}'
+      ')';
+
+  /// The equality operator.
+  ///
+  /// Two [ColorRef]s are equal if they have the same [defaultColor] and [id].
+  /// Please note, the current color (that depends on the current theme)
+  /// is ignored.
+  ///
+  /// If you want to check equality for the [ColorRef]'s current color,
+  /// you can use its [color] or [value] getters. For example:
+  ///
+  /// * ColorRef(Colors.white).color == ColorRef(Colors.white).color // Is true
+  /// * ColorRef(Colors.white).color == Colors.white // Is true
+  /// * ColorRef(Colors.white) == Colors.white // Is false
+  ///
+  @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       super == other &&
@@ -819,7 +837,15 @@ class TextStyleRef implements TextStyle, ThemeRef {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return super.toString();
+    String? result = defaultTextStyle?.toString();
+    if (result != null) {
+      int pos = result.indexOf('(');
+      if (pos == -1) return result;
+      result =
+          'TextStyleRef(${result.substring(pos + 1, result.length - 1)}${id == null ? "" : ", id: $id"})';
+      return result;
+    } else
+      return 'TextStyleRef(id: ${id == null ? "" : id})';
   }
 }
 
