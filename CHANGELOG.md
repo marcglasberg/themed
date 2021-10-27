@@ -1,3 +1,8 @@
+## [2.3.0] - 2021/10/27
+
+* Color extension: `darker`, `lighter`, `average`, `decolorize`, `addOpacity`, `rgbaToArgb`
+  and `abgrToArgb` methods.
+
 ## [2.2.0] - 2021/10/23
 
 * Improved `ColorRef.toString()` and `TextStyleRef.toString()` methods.

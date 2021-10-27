@@ -162,6 +162,63 @@ Themed.transformColor = ColorRef.shadesOfGreyTransform;
 Themed.clearTransformColor();
 ```
 
+# Color extension
+
+The `lighter` method makes the color lighter (more white). Example:
+
+```
+// 20% more white.
+Colors.blue.lighter(0.2); 
+```
+
+The `darker` method makes the color darker (more black). Example:
+
+```
+// 20% more black.
+Colors.blue.darker(0.2); 
+```
+
+The `average` method makes the current color more similar to the given `color`. Example:
+
+```
+// 50% blue and 50% red.
+Colors.blue.average(Colors.red); 
+
+// 20% blue and 80% red.
+Colors.blue.average(Colors.red, 0.8);
+```
+
+The `decolorize` method makes the current color more grey. Example:
+
+```
+// Grey, with luminance similar to the original blue.
+Colors.blue.decolorize(); 
+
+// Blue with 20% less color.
+Colors.blue.decolorize(0.2);
+```
+
+The `addOpacity` method makes the current color more transparent than it already is, by the given
+amount. This is different from the `withOpacity` method, as you can see below.
+
+```
+// 50% transparent blue.
+Colors.blue.addOpacity(0.5); 
+
+// Also 50% transparent blue.
+Colors.withOpacity(0.5); 
+
+// 75% transparent blue, because we add 50% and then more 50%.
+Colors.blue.addOpacity(0.5).addOpacity(0.5);
+
+// This is 50% transparent blue, because the opacity is replaced, not added.
+Colors.withOpacity(0.5).withOpacity(0.5);
+```
+
+There are also two methods for advanced color representation conversion: The `rgbaToArgb` method
+converts the RGBA color representation to ARGB. The `abgrToArgb` method converts the ABGR color
+representation to ARGB.
+
 # TextStyle transform
 
 You can also create a **style transformation**. For example, this will make your fonts larger:
