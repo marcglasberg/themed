@@ -2,8 +2,13 @@
 
 # themed
 
-The **Themed** package lets you define a theme with **const** values, and then, by using some dark
-Dart magic, go and change them dynamically anyway.
+The **Themed** package: 
+
+* Lets you define a theme with **const** values, but change them dynamically anyway.
+* Color extension methods: `Colors.blue.decolorize()` and more.
+* TextStyle extension methods: `var myStyle = TextStyle(fontSize: 15) + Colors.blue` and more.
+
+## Const values that you can change
 
 As we all know, using const variables is the easiest way to create and use themes:
 
