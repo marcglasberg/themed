@@ -38,7 +38,7 @@ class ChangeColors extends StatelessWidget {
   final double saturation;
 
   /// From -1.0 to 1.0 (Note: 1.0 wraps into -1.0, such as 1.2 is the same as -0.8).
-  /// Note: 0.0 is unchanged. Adding or subtracting 2.0 also keeps it unchanged.
+  /// Note: 0.0 is unchanged. Adding or subtracting multiples of 2.0 also keeps it unchanged.
   final double hue;
 
   final Widget child;
