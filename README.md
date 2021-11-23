@@ -2,9 +2,10 @@
 
 # themed
 
-The **Themed** package: 
+The **Themed** package:
 
 * Lets you define a theme with **const** values, but change them dynamically anyway.
+* `ChangeColors` widget to change the brightness, saturation and hue of widgets or images.
 * Color extension methods: `Colors.blue.decolorize()` and more.
 * TextStyle extension methods: `var myStyle = TextStyle(fontSize: 15) + Colors.blue` and more.
 
@@ -166,6 +167,29 @@ Themed.transformColor = ColorRef.shadesOfGreyTransform;
 // Then, later, turn it off:
 Themed.clearTransformColor();
 ```
+
+# Changing brightness, saturation and hue of widgets or images.
+
+Use the provided `ChangeColors` widget to change the brightness, saturation and hue of any widget,
+including images. Example:
+
+```
+ChangeColors(
+   hue: 0.55,
+   brightness: 0.2,
+   saturation: 0.1,
+   child: Image.asset('myImage.png'),
+);
+```
+
+To achieve a greyscale effect, you may also use the `ChangeColors.greyscale` constructor.
+
+_Note: This widget is based upon
+<a href="https://stackoverflow.com/questions/64639589/how-to-adjust-hue-saturation-and-brightness-of-an-image-in-flutter">
+this code</a> (from <a href="https://stackoverflow.com/users/937841/banananeil">
+BananaNeil's</a>), which is in turn based upon <a href='https://stackoverflow.com/a/7917978/937841'>
+this code</a> (by <a href="https://stackoverflow.com/users/812976/richard-lalancette">Richard
+Lalancette</a>)._
 
 # Color extension
 

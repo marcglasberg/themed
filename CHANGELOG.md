@@ -1,3 +1,8 @@
+## [2.4.0] - 2021/11/23
+
+* `ChangeColors` widget to change the brightness, saturation and hue of any widget, including
+  images.
+
 ## [2.3.0] - 2021/10/27
 
 * Color extension: `darker`, `lighter`, `average`, `decolorize`, `addOpacity`, `rgbaToArgb`

@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import 'package:themed/src/change_colors.dart';
 
 extension ColorUtil on Color {
   //
@@ -6,6 +7,9 @@ extension ColorUtil on Color {
   /// If [value] is not provided, it will be 0.5 (50% change).
   /// If [value] is less than 0, it's 0. If more than 1, it's 1.
   /// Doesn't change the opacity.
+  ///
+  /// See also: [ChangeColors]
+  ///
   Color lighter([double value = 0.5]) =>
       Color.lerp(this, Colors.white, _limit(value))!.withAlpha(alpha);
 
@@ -13,6 +17,9 @@ extension ColorUtil on Color {
   /// If [value] is not provided, it will be 0.5 (50% change).
   /// If [value] is less than 0, it's 0. If more than 1, it's 1.
   /// Doesn't change the opacity.
+  ///
+  /// See also: [ChangeColors]
+  ///
   Color darker([double value = 0.5]) =>
       Color.lerp(this, Colors.black, _limit(value))!.withAlpha(alpha);
 
@@ -21,6 +28,9 @@ extension ColorUtil on Color {
   /// If [value] is not provided, it will be 0.5 (50% change).
   /// If [value] is less than 0, it's 0. If more than 1, it's 1.
   /// Doesn't change the opacity.
+  ///
+  /// See also: [ChangeColors]
+  ///
   Color average(Color color, [double value = 0.5]) => Color.lerp(this, color, _limit(value))!;
 
   /// Makes the current color more grey (aprox. keeping its luminance), by the given [value],
@@ -28,6 +38,9 @@ extension ColorUtil on Color {
   /// If [value] is not provided, it will be 1 (100% change, no color at all).
   /// If [value] is less than 0, it's 0. If more than 1, it's 1.
   /// Doesn't change the opacity.
+  ///
+  /// See also: [ChangeColors]
+  ///
   Color decolorize([double value = 1]) {
     int average = (red + green + blue) ~/ 3;
     var color = Color.fromARGB(alpha, average, average, average);
