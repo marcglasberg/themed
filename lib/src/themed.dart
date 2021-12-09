@@ -1,15 +1,7 @@
-import 'dart:ui' as ui
-    show
-        ParagraphStyle,
-        TextStyle,
-        Shadow,
-        FontFeature,
-        TextHeightBehavior,
-        TextLeadingDistribution;
+import 'dart:ui' as ui show ParagraphStyle, TextStyle, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 // ////////////////////////////////////////////////////////////////////////////
 
@@ -112,8 +104,7 @@ void _setTransformColor(Color Function(Color)? transform) {
 }
 
 /// Returns true if the given color transform is equal to the current one.
-bool _ifCurrentTransformColorIs(Color Function(Color)? transform) =>
-    identical(transform, _transformColor);
+bool _ifCurrentTransformColorIs(Color Function(Color)? transform) => identical(transform, _transformColor);
 
 /// Sets a transform which will be applied to all colors.
 void _setTransformTextStyle(TextStyle Function(TextStyle)? transform) {
@@ -324,8 +315,7 @@ class Themed extends StatefulWidget {
   /// Same as `Themed.ifCurrentTransformColorIs( ... )`.
   ///
   /// Returns true if the given color transform is equal to the current one.
-  static bool ifCurrentTransformColorIs(Color Function(Color)? transform) =>
-      _ifCurrentTransformColorIs(transform);
+  static bool ifCurrentTransformColorIs(Color Function(Color)? transform) => _ifCurrentTransformColorIs(transform);
 
   /// Same as `Themed.ifCurrentTransformTextStyleIs( ... )`.
   ///
@@ -340,8 +330,7 @@ class Themed extends StatefulWidget {
   /// Themed.of(context).theme = Locale("en", "US");
   ///
   static _ThemedState of(BuildContext context) {
-    _InheritedConstTheme? inherited =
-        context.dependOnInheritedWidgetOfExactType<_InheritedConstTheme>();
+    _InheritedConstTheme? inherited = context.dependOnInheritedWidgetOfExactType<_InheritedConstTheme>();
 
     if (inherited == null)
       throw ConstThemeException("Can't find the `Themed` widget up in the tree. "
@@ -431,8 +420,7 @@ class _ThemedState extends State<Themed> {
   /// Same as `Themed.ifCurrentTransformColorIs( ... )`.
   ///
   /// Returns true if the given color transform is equal to the current one.
-  bool ifCurrentTransformColorIs(Color Function(Color)? transform) =>
-      _ifCurrentTransformColorIs(transform);
+  bool ifCurrentTransformColorIs(Color Function(Color)? transform) => _ifCurrentTransformColorIs(transform);
 
   /// Same as `Themed.ifCurrentTransformTextStyleIs( ... )`.
   ///
@@ -490,8 +478,7 @@ class ConstThemeException {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ConstThemeException && runtimeType == other.runtimeType && msg == other.msg;
+      identical(this, other) || other is ConstThemeException && runtimeType == other.runtimeType && msg == other.msg;
 
   @override
   int get hashCode => msg.hashCode;
@@ -621,6 +608,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
     TextOverflow? overflow,
+    String? package,
   }) {
     return textStyle.apply(
       color: color,
@@ -648,6 +636,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
       shadows: shadows,
       fontFeatures: fontFeatures,
       overflow: overflow,
+      package: package,
     );
   }
 
@@ -691,6 +680,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
     double? decorationThickness,
     String? debugLabel,
     TextOverflow? overflow,
+    String? package,
   }) {
     return textStyle.copyWith(
       inherit: inherit,
@@ -717,6 +707,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
       decorationThickness: decorationThickness,
       debugLabel: debugLabel,
       overflow: overflow,
+      package: package,
     );
   }
 
@@ -795,8 +786,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
   }
 
   @override
-  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) =>
-      textStyle.getTextStyle(textScaleFactor: textScaleFactor);
+  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) => textStyle.getTextStyle(textScaleFactor: textScaleFactor);
 
   @override
   double? get height => textStyle.height;
@@ -841,8 +831,7 @@ class TextStyleRef implements TextStyle, ThemeRef {
     if (result != null) {
       int pos = result.indexOf('(');
       if (pos == -1) return result;
-      result =
-          'TextStyleRef(${result.substring(pos + 1, result.length - 1)}${id == null ? "" : ", id: $id"})';
+      result = 'TextStyleRef(${result.substring(pos + 1, result.length - 1)}${id == null ? "" : ", id: $id"})';
       return result;
     } else
       return 'TextStyleRef(id: ${id == null ? "" : id})';
