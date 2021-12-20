@@ -1,4 +1,11 @@
-import 'dart:ui' as ui show ParagraphStyle, TextStyle, Shadow, FontFeature, TextHeightBehavior, TextLeadingDistribution;
+import 'dart:ui' as ui
+    show
+        ParagraphStyle,
+        TextStyle,
+        Shadow,
+        FontFeature,
+        TextHeightBehavior,
+        TextLeadingDistribution;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -104,7 +111,8 @@ void _setTransformColor(Color Function(Color)? transform) {
 }
 
 /// Returns true if the given color transform is equal to the current one.
-bool _ifCurrentTransformColorIs(Color Function(Color)? transform) => identical(transform, _transformColor);
+bool _ifCurrentTransformColorIs(Color Function(Color)? transform) =>
+    identical(transform, _transformColor);
 
 /// Sets a transform which will be applied to all colors.
 void _setTransformTextStyle(TextStyle Function(TextStyle)? transform) {
@@ -315,7 +323,8 @@ class Themed extends StatefulWidget {
   /// Same as `Themed.ifCurrentTransformColorIs( ... )`.
   ///
   /// Returns true if the given color transform is equal to the current one.
-  static bool ifCurrentTransformColorIs(Color Function(Color)? transform) => _ifCurrentTransformColorIs(transform);
+  static bool ifCurrentTransformColorIs(Color Function(Color)? transform) =>
+      _ifCurrentTransformColorIs(transform);
 
   /// Same as `Themed.ifCurrentTransformTextStyleIs( ... )`.
   ///
@@ -330,7 +339,8 @@ class Themed extends StatefulWidget {
   /// Themed.of(context).theme = Locale("en", "US");
   ///
   static _ThemedState of(BuildContext context) {
-    _InheritedConstTheme? inherited = context.dependOnInheritedWidgetOfExactType<_InheritedConstTheme>();
+    _InheritedConstTheme? inherited =
+        context.dependOnInheritedWidgetOfExactType<_InheritedConstTheme>();
 
     if (inherited == null)
       throw ConstThemeException("Can't find the `Themed` widget up in the tree. "
@@ -420,7 +430,8 @@ class _ThemedState extends State<Themed> {
   /// Same as `Themed.ifCurrentTransformColorIs( ... )`.
   ///
   /// Returns true if the given color transform is equal to the current one.
-  bool ifCurrentTransformColorIs(Color Function(Color)? transform) => _ifCurrentTransformColorIs(transform);
+  bool ifCurrentTransformColorIs(Color Function(Color)? transform) =>
+      _ifCurrentTransformColorIs(transform);
 
   /// Same as `Themed.ifCurrentTransformTextStyleIs( ... )`.
   ///
@@ -478,7 +489,8 @@ class ConstThemeException {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is ConstThemeException && runtimeType == other.runtimeType && msg == other.msg;
+      identical(this, other) ||
+      other is ConstThemeException && runtimeType == other.runtimeType && msg == other.msg;
 
   @override
   int get hashCode => msg.hashCode;
@@ -550,7 +562,7 @@ class ColorRef extends Color implements ThemeRef {
 
 // ////////////////////////////////////////////////////////////////////////////
 
-class TextStyleRef implements TextStyle, ThemeRef {
+class TextStyleRef extends TextStyle implements ThemeRef {
   //
   final String? id;
   final TextStyle? defaultTextStyle;
@@ -712,11 +724,6 @@ class TextStyleRef implements TextStyle, ThemeRef {
   }
 
   @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix = ''}) {
-    textStyle.debugFillProperties(properties, prefix: prefix);
-  }
-
-  @override
   String? get debugLabel => textStyle.debugLabel;
 
   @override
@@ -786,7 +793,8 @@ class TextStyleRef implements TextStyle, ThemeRef {
   }
 
   @override
-  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) => textStyle.getTextStyle(textScaleFactor: textScaleFactor);
+  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) =>
+      textStyle.getTextStyle(textScaleFactor: textScaleFactor);
 
   @override
   double? get height => textStyle.height;
@@ -831,7 +839,8 @@ class TextStyleRef implements TextStyle, ThemeRef {
     if (result != null) {
       int pos = result.indexOf('(');
       if (pos == -1) return result;
-      result = 'TextStyleRef(${result.substring(pos + 1, result.length - 1)}${id == null ? "" : ", id: $id"})';
+      result =
+          'TextStyleRef(${result.substring(pos + 1, result.length - 1)}${id == null ? "" : ", id: $id"})';
       return result;
     } else
       return 'TextStyleRef(id: ${id == null ? "" : id})';

@@ -1,3 +1,7 @@
+## [3.0.0] - 2021/12/20
+
+* Flutter 2.8.1 compatible.
+
 ## [2.4.0] - 2021/11/23
 
 * `ChangeColors` widget to change the brightness, saturation and hue of any widget, including
