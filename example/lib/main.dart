@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: MyTheme.color2,
           elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(primary: MyTheme.color2),
+            style: ElevatedButton.styleFrom(backgroundColor: MyTheme.color2),
           ),
         ),
         //

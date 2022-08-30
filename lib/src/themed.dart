@@ -5,7 +5,8 @@ import 'dart:ui' as ui
         Shadow,
         FontFeature,
         TextHeightBehavior,
-        TextLeadingDistribution;
+        TextLeadingDistribution,
+        FontVariation;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -186,9 +187,7 @@ class Themed extends StatefulWidget {
   }
 
   static void _setState() {
-    if (WidgetsBinding.instance != null) {
-      _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
-    }
+    _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
   }
 
   /// Same as `Themed.of(context).currentTheme = { ... };`
@@ -619,8 +618,9 @@ class TextStyleRef extends TextStyle implements ThemeRef {
     Locale? locale,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
-    TextOverflow? overflow,
+    List<ui.FontVariation>? fontVariations,
     String? package,
+    TextOverflow? overflow,
   }) {
     return textStyle.apply(
       color: color,
@@ -686,6 +686,7 @@ class TextStyleRef extends TextStyle implements ThemeRef {
     Paint? background,
     List<ui.Shadow>? shadows,
     List<ui.FontFeature>? fontFeatures,
+    List<ui.FontVariation>? fontVariations,
     TextDecoration? decoration,
     Color? decorationColor,
     TextDecorationStyle? decorationStyle,
@@ -713,6 +714,7 @@ class TextStyleRef extends TextStyle implements ThemeRef {
       background: background,
       shadows: shadows,
       fontFeatures: fontFeatures,
+      fontVariations: fontVariations,
       decoration: decoration,
       decorationColor: decorationColor,
       decorationStyle: decorationStyle,
