@@ -11,8 +11,6 @@ import 'dart:ui' as ui
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// ////////////////////////////////////////////////////////////////////////////
-
 extension TextStyleExtension on TextStyle {
   //
   /// You can create a [TextStyle] by adding the [TextStyle] to one these types:
@@ -52,15 +50,11 @@ extension TextStyleExtension on TextStyle {
   TextStyle add(Object? obj, {bool apply = true}) => (apply) ? this + obj : this;
 }
 
-// ////////////////////////////////////////////////////////////////////////////
-
 class TextHeight {
   final double height;
 
   const TextHeight(this.height);
 }
-
-// ////////////////////////////////////////////////////////////////////////////
 
 class FontSize {
   final double fontSize;
@@ -68,11 +62,7 @@ class FontSize {
   const FontSize(this.fontSize);
 }
 
-// ////////////////////////////////////////////////////////////////////////////
-
 abstract class ThemeRef {}
-
-// ////////////////////////////////////////////////////////////////////////////
 
 /// The current theme overrides the default theme. If a value is present in the current theme, it
 /// will be used. If not, the value from the default theme will be used instead. For this reason,
@@ -123,8 +113,6 @@ void _setTransformTextStyle(TextStyle Function(TextStyle)? transform) {
 /// Returns true if the given text style transform is equal to the current one.
 bool _ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
     identical(transform, _transformTextStyle);
-
-// ////////////////////////////////////////////////////////////////////////////
 
 /// Instead of:
 ///
@@ -352,8 +340,6 @@ class Themed extends StatefulWidget {
   _ThemedState createState() => _ThemedState();
 }
 
-// ////////////////////////////////////////////////////////////////////////////
-
 class _ThemedState extends State<Themed> {
   //
   /// To change the current theme:
@@ -460,8 +446,6 @@ class _ThemedState extends State<Themed> {
   }
 }
 
-// ////////////////////////////////////////////////////////////////////////////
-
 class _InheritedConstTheme extends InheritedWidget {
   //
   final _ThemedState data;
@@ -475,8 +459,6 @@ class _InheritedConstTheme extends InheritedWidget {
   @override
   bool updateShouldNotify(_InheritedConstTheme old) => true;
 }
-
-// ////////////////////////////////////////////////////////////////////////////
 
 class ConstThemeException {
   String msg;
@@ -494,8 +476,6 @@ class ConstThemeException {
   @override
   int get hashCode => msg.hashCode;
 }
-
-// ////////////////////////////////////////////////////////////////////////////
 
 class ColorRef extends Color implements ThemeRef {
   //
@@ -558,8 +538,6 @@ class ColorRef extends Color implements ThemeRef {
   @override
   int get hashCode => id.hashCode ^ defaultColor.hashCode;
 }
-
-// ////////////////////////////////////////////////////////////////////////////
 
 class TextStyleRef extends TextStyle implements ThemeRef {
   //
@@ -765,7 +743,7 @@ class TextStyleRef extends TextStyle implements ThemeRef {
   ui.ParagraphStyle getParagraphStyle({
     TextAlign? textAlign,
     TextDirection? textDirection,
-    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
     String? ellipsis,
     int? maxLines,
     ui.TextHeightBehavior? textHeightBehavior,
@@ -780,7 +758,7 @@ class TextStyleRef extends TextStyle implements ThemeRef {
     return textStyle.getParagraphStyle(
       textAlign: textAlign,
       textDirection: textDirection,
-      textScaleFactor: textScaleFactor,
+      textScaler: textScaler,
       ellipsis: ellipsis,
       maxLines: maxLines,
       textHeightBehavior: textHeightBehavior,
@@ -795,8 +773,20 @@ class TextStyleRef extends TextStyle implements ThemeRef {
   }
 
   @override
-  ui.TextStyle getTextStyle({double textScaleFactor = 1.0}) =>
-      textStyle.getTextStyle(textScaleFactor: textScaleFactor);
+  ui.TextStyle getTextStyle({
+    @Deprecated(
+      'Use textScaler instead. '
+      'Use of textScaleFactor was deprecated in preparation for the upcoming nonlinear text scaling support. '
+      'This feature was deprecated after v3.12.0-2.0.pre.',
+    )
+    double textScaleFactor = 1.0,
+    TextScaler textScaler = TextScaler.noScaling,
+  }) =>
+      textStyle.getTextStyle(
+        // ignore: deprecated_member_use
+        textScaleFactor: textScaleFactor,
+        textScaler: textScaler,
+      );
 
   @override
   double? get height => textStyle.height;
@@ -849,8 +839,6 @@ class TextStyleRef extends TextStyle implements ThemeRef {
   }
 }
 
-// ////////////////////////////////////////////////////////////////////////////
-
 /// You can create color swatches from colors only (which you can later change):
 ///
 /// ```
@@ -879,8 +867,6 @@ class MaterialColorSwatch extends MaterialColor {
   int get value => primary.value;
 }
 
-// ////////////////////////////////////////////////////////////////////////////
-
 /// You can create color swatches from colors only (which you can later change):
 ///
 /// ```
@@ -904,8 +890,6 @@ class MaterialAccentColorSwatch extends MaterialAccentColor {
   int get value => primary.value;
 }
 
-// ////////////////////////////////////////////////////////////////////////////
-
 Map<ThemeRef, Object> toIdenticalKeyedMap(Map<ThemeRef, Object>? theme) {
   if (theme == null)
     return const {};
@@ -921,5 +905,3 @@ Map<ThemeRef, Object> toIdenticalKeyedMap(Map<ThemeRef, Object>? theme) {
     return result;
   }
 }
-
-// ////////////////////////////////////////////////////////////////////////////

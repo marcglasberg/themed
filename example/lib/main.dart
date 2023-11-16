@@ -6,8 +6,6 @@ import 'package:themed/themed.dart';
 /// 2) We can use the `const` keyword.
 /// 3) An extension allows us to add a Color to a TextStyle.
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 class MyTheme {
   static const color1 = ColorRef(Colors.white);
   static const color2 = ColorRef(Colors.blue);
