@@ -443,6 +443,10 @@ class _ThemedState extends State<Themed> {
     }
 
     (context as Element).visitChildren(rebuild);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      WidgetsBinding.instance.reassembleApplication();
+    });
   }
 }
 
