@@ -424,10 +424,8 @@ class _ThemedState extends State<Themed> {
   bool ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
       _ifCurrentTransformTextStyleIs(transform);
 
-  /// Each time widget is rebuild it will try to recreate its tree.
   @override
   Widget build(BuildContext context) {
-    _rebuildAllChildren();
     return _InheritedConstTheme(
       key: ValueKey<Object>(Object()), // ignore: prefer_const_constructors
       data: this,
