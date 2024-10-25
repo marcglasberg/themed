@@ -7,7 +7,8 @@ The **Themed** package:
 * Lets you define a theme with **const** values, but change them dynamically anyway.
 * `ChangeColors` widget to change the brightness, saturation and hue of widgets or images.
 * Color extension methods: `Colors.blue.decolorize()` and more.
-* TextStyle extension methods: `var myStyle = TextStyle(fontSize: 15) + Colors.blue` and more.
+* TextStyle extension methods: `var myStyle = TextStyle(fontSize: 15) + Colors.blue` and
+  more.
 
 ## Const values that you can change
 
@@ -22,8 +23,8 @@ Container(
   child: const Text('Hi', style: myStyle)))
 ```
 
-However, if you do it like that you can't later change the theme dynamically. By using the
-**Themed** package you can:
+However, if you do it like that you can't later change the theme dynamically.
+By using the **Themed** package you can:
 
 ```
 static const myColor = ColorRef(Colors.white); 
@@ -51,8 +52,8 @@ Container(
    child: Text('Hello', style: TextStyle(color: Theme.of(context).secondary)))
 ```
 
-Also, since `Theme.of` needs the `context` and is not constant, you can't use it in constructors.
-However, the *Themed* package has no such limitations:
+Also, since `Theme.of` needs the `context` and is not constant, you can't use it in
+constructors. However, the *Themed* package has no such limitations:
 
 ```
 // The const color is the default value of an optional parameter.
@@ -77,12 +78,13 @@ Widget build(BuildContext context) {
 
 # Compatibility
 
-The *Themed* package is a competitor to writing `Theme.of(context).xxx` in your build methods, but
-it’s *NOT* a competitor to Flutter’s native theme system and the `Theme` widget. It’s there to solve
-a different problem, and it’s usually used together with the `Theme` widget. For example, if you
-want to set a global default color for all buttons, you’ll use the `Theme` widget. You may use it
-together with the `Themed` package however, meaning that `Themed` colors and styles may be used
-inside a `ThemeData` widget:
+The *Themed* package is a competitor to writing `Theme.of(context).xxx` in your build
+methods, but it’s *NOT* a competitor to Flutter’s native theme system and the `Theme`
+widget. It’s there to solve a different problem, and it’s usually used together with
+the `Theme` widget. For example, if you want to set a global default color for all
+buttons, you’ll use the `Theme` widget. You may use it together with the `Themed`
+package however, meaning that `Themed` colors and styles may be used inside
+a `ThemeData` widget:
 
 ```
 static const myColor1 = ColorRef(Colors.red);
@@ -102,8 +104,8 @@ child: MaterialApp(
 ## How to define a theme map
 
 Each theme should be a `Map<ThemeRef, Object>`, where the **keys** are your `ColorRef`
-and `TextStyleRef` const values, and the **values** are the colors and styles you want to use on
-that theme. For example:
+and `TextStyleRef` const values, and the **values** are the colors and styles you want to
+use on that theme. For example:
 
 ```
 Map<ThemeRef, Object> theme1 = {
@@ -147,8 +149,8 @@ Container(
 
 # Color transform
 
-Instead of changing the current theme you can create a **color transformation**. For example, this
-will turn your theme into shades of grey:
+Instead of changing the current theme you can create a **color transformation**.
+For example, this will turn your theme into shades of grey:
 
 ```
 static Color shadesOfGreyTransform(Color color) {
@@ -157,8 +159,8 @@ static Color shadesOfGreyTransform(Color color) {
 }
 ```
 
-Note you can create your own function to process colors, but `shadesOfGreyTransform` is already
-provided:
+Note you can create your own function to process colors, but `shadesOfGreyTransform` is
+already provided:
 
 ```
 // Turn it on:
@@ -170,8 +172,8 @@ Themed.clearTransformColor();
 
 # Changing brightness, saturation and hue of widgets or images.
 
-Use the provided `ChangeColors` widget to change the brightness, saturation and hue of any widget,
-including images. Example:
+Use the provided `ChangeColors` widget to change the brightness, saturation and hue of any
+widget, including images. Example:
 
 ```
 ChangeColors(
@@ -187,9 +189,10 @@ To achieve a greyscale effect, you may also use the `ChangeColors.greyscale` con
 _Note: This widget is based upon
 <a href="https://stackoverflow.com/questions/64639589/how-to-adjust-hue-saturation-and-brightness-of-an-image-in-flutter">
 this code</a> (from <a href="https://stackoverflow.com/users/937841/banananeil">
-BananaNeil's</a>), which is in turn based upon <a href='https://stackoverflow.com/a/7917978/937841'>
-this code</a> (by <a href="https://stackoverflow.com/users/812976/richard-lalancette">Richard
-Lalancette</a>)._
+BananaNeil's</a>), which is in turn based
+upon <a href='https://stackoverflow.com/a/7917978/937841'>
+this code</a> (by <a href="https://stackoverflow.com/users/812976/richard-lalancette">
+Richard Lalancette</a>)._
 
 # Color extension
 
@@ -227,12 +230,17 @@ Colors.blue.decolorize();
 Colors.blue.decolorize(0.2);
 ```
 
-The `addOpacity` method makes the current color more transparent than it already is, by the given
-amount. This is different from the `withOpacity` method, as you can see below.
+The `addOpacity` method makes the current color more transparent than it already is, by
+the given amount. The `removeOpacity` method makes the current color less transparent than
+it already is, by the given amount. This is different from the `withOpacity` method,
+as you can see below.
 
 ```
 // 50% transparent blue.
 Colors.blue.addOpacity(0.5); 
+
+// 80% transparent black.
+Colors.transparent.removeOpacity(0.2); 
 
 // Also 50% transparent blue.
 Colors.withOpacity(0.5); 
@@ -244,13 +252,14 @@ Colors.blue.addOpacity(0.5).addOpacity(0.5);
 Colors.withOpacity(0.5).withOpacity(0.5);
 ```
 
-There are also two methods for advanced color representation conversion: The `rgbaToArgb` method
-converts the RGBA color representation to ARGB. The `abgrToArgb` method converts the ABGR color
-representation to ARGB.
+There are also two methods for advanced color representation conversion: The `rgbaToArgb`
+method converts the RGBA color representation to ARGB. The `abgrToArgb` method
+converts the ABGR color representation to ARGB.
 
 # TextStyle transform
 
-You can also create a **style transformation**. For example, this will make your fonts larger:
+You can also create a **style transformation**. For example, this will make your fonts
+larger:
 
 ```
 static TextStyle largerText(TextStyle textStyle) =>
@@ -265,8 +274,8 @@ Themed.clearTransformTextStyle();
 
 # TextStyle extension
 
-With the provided extension, you can make your code more clean-code by creating new text styles by
-adding colors and other values to a `TextStyle`. For example:
+With the provided extension, you can make your code more clean-code by creating new text
+styles by adding colors and other values to a `TextStyle`. For example:
 
 ```
 const myStyle = TextStyle(...);
@@ -283,8 +292,8 @@ Text('Hello', style: myStyle + FontWeight.w900 + FontSize(20.0) + TextHeight(1.2
 
 # Beware not to define the same constant
 
-Please remember Dart constants point to the same memory space. In this example, `colorA`, `colorB`
-and `colorC` represent the same variable:
+Please remember Dart constants point to the same memory space.
+In this example, `colorA`, `colorB` and `colorC` represent the same variable:
 
 ```
 class MyTheme {
@@ -294,11 +303,12 @@ class MyTheme {
 }
 ```
 
-If you later change the color of `colorA`, you are also automatically changing the color of `colorB`
-and `colorB`.
+If you later change the color of `colorA`, you are also automatically changing the color
+of `colorB` and `colorB`.
 
-If you want to create 3 independent colors, and be able to change them independently, you have to
-create different constants. You can provide an `id` string, just to differentiate them. For example:
+If you want to create 3 independent colors, and be able to change them independently, you
+have to create different constants. You can provide an `id` string, just to
+differentiate them. For example:
 
 ```
 class MyTheme {
@@ -319,12 +329,13 @@ Map<ThemeRef, Object> anotherTheme = {
 };
 ```
 
-You can have references which depend on other references, no problem. But both direct and indirect
-circular references must be avoided.
+You can have references which depend on other references, no problem. But both direct and
+indirect circular references must be avoided.
 
 # Other ways to use it
 
-If you want, you may also define a **default** theme, and a **current** theme for your app:
+If you want, you may also define a **default** theme, and a **current** theme for your
+app:
 
 ```
 @override
@@ -336,18 +347,18 @@ Widget build(BuildContext context) {
         ...      
 ```
 
-The `defaultTheme` and `currentTheme` are both optional. They are simply theme maps, as explained
-below.
+The `defaultTheme` and `currentTheme` are both optional. They are simply theme maps, as
+explained below.
 
 When a color/style is used, it will first search it inside the `currentTheme`.
 
 If it's not found there, it searches inside of `defaultTheme`.
 
-If it's still not found there, it uses the default color/style which was defined in the constructor.
-For example, here the default color is white: `ColorRef(Colors.white)`.
+If it's still not found there, it uses the default color/style which was defined in the
+constructor. For example, here the default color is white: `ColorRef(Colors.white)`.
 
-Please note: If you define all your colors in the `defaultTheme`, then you don't need to provide
-default values in the constructor. You can then use the `fromId` constructor:
+Please note: If you define all your colors in the `defaultTheme`, then you don't need to
+provide default values in the constructor. You can then use the `fromId` constructor:
 
 ```
 class MyTheme {
@@ -360,8 +371,8 @@ class MyTheme {
 
 ## Saving and setting Themes by key
 
-You can save themes with keys, and then later use the keys to set the theme. The keys can be
-anything (Strings, enums etc.):
+You can save themes with keys, and then later use the keys to set the theme. The keys can
+be anything (Strings, enums etc.):
 
 ```
 // Save some themes using keys.
@@ -393,7 +404,8 @@ Important: When I say "save" above, I mean it's saved in memory, not in the devi
 
 # Copyright
 
-**This package is copyrighted and brought to you by <a href="https://www.parksidesecurities.com/">
+**This package is copyrighted and brought to you
+by <a href="https://www.parksidesecurities.com/">
 Parkside Technologies</a>, a company which is simplifying global access to US stocks.**
 
 This package is published here with permission.
@@ -418,7 +430,7 @@ Please, see the license page for more information.
 * <a href="https://pub.dev/packages/weak_map">weak_map</a>
 * <a href="https://pub.dev/packages/themed">themed</a>
 * <a href="https://pub.dev/packages/bdd_framework">bdd_framework</a>
- 
+
 *My Medium Articles:*
 
 * <a href="https://medium.com/flutter-community/https-medium-com-marcglasberg-async-redux-33ac5e27d5f6">
@@ -437,7 +449,8 @@ Please, see the license page for more information.
 
 *My article in the official Flutter documentation*:
 
-* <a href="https://flutter.dev/docs/development/ui/layout/constraints">Understanding constraints</a>
+* <a href="https://flutter.dev/docs/development/ui/layout/constraints">Understanding
+  constraints</a>
 
 <br>_Marcelo Glasberg:_<br>
 
@@ -447,7 +460,8 @@ Please, see the license page for more information.
 <br>
 <a href="https://twitter.com/glasbergmarcelo">_twitter.com/glasbergmarcelo_</a>
 <br>
-<a href="https://stackoverflow.com/users/3411681/marcg">_stackoverflow.com/users/3411681/marcg_</a>
+<a href="https://stackoverflow.com/users/3411681/marcg">
+_stackoverflow.com/users/3411681/marcg_</a>
 <br>
 <a href="https://medium.com/@marcglasberg">_medium.com/@marcglasberg_</a>
 <br>

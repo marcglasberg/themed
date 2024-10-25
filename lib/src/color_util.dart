@@ -31,7 +31,8 @@ extension ColorUtil on Color {
   ///
   /// See also: [ChangeColors]
   ///
-  Color average(Color color, [double value = 0.5]) => Color.lerp(this, color, _limit(value))!;
+  Color average(Color color, [double value = 0.5]) =>
+      Color.lerp(this, color, _limit(value))!;
 
   /// Makes the current color more grey (aprox. keeping its luminance), by the given [value],
   /// from `0` (no change) to `1` (grey).
@@ -54,6 +55,16 @@ extension ColorUtil on Color {
   /// Makes it more transparent if percent < 1.
   Color addOpacity([double value = 0.5]) =>
       Color.fromARGB((alpha * _limit(value)).round(), red, green, blue);
+
+  /// Makes the current color more opaque, by the given [value],
+  /// from `0` (no change) to `1` (fully opaque).
+  /// If [value] is not provided, it will be 0.5 (50% change).
+  /// If [value] is less than 0, it's 0. If more than 1, it's 1.
+  /// Makes it more opaque if percent < 1.
+  Color removeOpacity([double value = 0.5]) {
+    return Color.fromARGB(
+        (alpha + ((255 - alpha) * _limit(value))).round(), red, green, blue);
+  }
 
   /// Converts the RGBA color representation to ARGB.
   static int rgbaToArgb(int rgbaColor) {

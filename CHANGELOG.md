@@ -1,52 +1,61 @@
-## [5.0.3] - 2022/11/16
+## [5.1.0]
+
+* Added `Color.removeOpacity()` extension method.
+  Note methods `addOpacity()`, `darker()`, `lighter()`, `average()` and `decolorize`
+  already existed.
+
+## [5.0.3]
 
 * Flutter 3.16.0 compatible.
 
-## [4.0.0] - 2022/08/30
+## [4.0.0]
 
 * Flutter 3.13.0 compatible.
 
-## [3.0.2] - 2021/12/20
+## [3.0.2]
 
 * Flutter 2.8.0 compatible.
 
-## [2.4.0] - 2021/11/23
+## [2.4.0]
 
-* `ChangeColors` widget to change the brightness, saturation and hue of any widget, including
+* `ChangeColors` widget to change the brightness, saturation and hue of any widget,
+  including
   images.
 
-## [2.3.0] - 2021/10/27
+## [2.3.0]
 
-* Color extension: `darker`, `lighter`, `average`, `decolorize`, `addOpacity`, `rgbaToArgb`
+* Color extension: `darker`, `lighter`, `average`, `decolorize`, `addOpacity`,
+  `rgbaToArgb`
   and `abgrToArgb` methods.
 
-## [2.2.0] - 2021/10/23
+## [2.2.0]
 
 * Improved `ColorRef.toString()` and `TextStyleRef.toString()` methods.
 
-## [2.1.0] - 2021/10/22
+## [2.1.0]
 
 * Saving and setting themes by key: `Themed.save()`, `Themed.setThemeByKey()` etc.
 * Fixed https://github.com/marcglasberg/themed/issues/1
 
-## [2.0.5] - 2021/09/20
+## [2.0.5]
 
 * Compatible with Flutter 2.5.
 
-## [2.0.4] - 2021/07/28
+## [2.0.4]
 
 * Docs improvements.
 * Small improvement for helping with tests.
 
-## [2.0.1] - 2021/07/01
+## [2.0.1]
 
-* Breaking change: The `id` now must only be provided if it's necessary to differentiate constants.
+* Breaking change: The `id` now must only be provided if it's necessary to differentiate
+  constants.
 
-## [1.0.1] - 2021/06/30
+## [1.0.1]
 
 * Docs improvement.
 * First publish to pub.dev.
 
-## [1.0.0] - 2021/06/15
+## [1.0.0]
 
 * Initial Commit.
