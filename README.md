@@ -6,7 +6,9 @@ The **Themed** package:
 
 * Lets you define a theme with **const** values, but change them dynamically anyway.
 * `ChangeColors` widget to change the brightness, saturation and hue of widgets or images.
-* Color extension methods: `Colors.blue.decolorize()` and more.
+* Color extension methods like `decolorize`, `addOpacity`, `removeOpacity`,
+  `darker`, `lighter`, `average` and more.
+* Static methods `ColorUtil.rgbaToArgb` and `ColorUtil.abgrToArgb`.
 * TextStyle extension methods: `var myStyle = TextStyle(fontSize: 15) + Colors.blue` and
   more.
 
@@ -252,9 +254,9 @@ Colors.blue.addOpacity(0.5).addOpacity(0.5);
 Colors.withOpacity(0.5).withOpacity(0.5);
 ```
 
-There are also two methods for advanced color representation conversion: The `rgbaToArgb`
-method converts the RGBA color representation to ARGB. The `abgrToArgb` method
-converts the ABGR color representation to ARGB.
+There are also two static methods for advanced color representation conversion:
+The `ColorUtil.rgbaToArgb` method converts the RGBA color representation to ARGB.
+The `ColorUtil.abgrToArgb` method converts the ABGR color representation to ARGB.
 
 # TextStyle transform
 

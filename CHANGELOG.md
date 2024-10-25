@@ -1,4 +1,4 @@
-## [5.1.0]
+## [5.1.1]
 
 * Added `Color.removeOpacity()` extension method.
   Note methods `addOpacity()`, `darker()`, `lighter()`, `average()` and `decolorize`
