@@ -1,3 +1,5 @@
+[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
+
 [![pub package](https://img.shields.io/pub/v/themed.svg)](https://pub.dartlang.org/packages/themed)
 
 # themed
