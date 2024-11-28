@@ -10,58 +10,9 @@ import 'dart:ui' as ui
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:themed/src/const_theme_exception.dart';
 
 abstract class ThemeRef {}
-
-/// The current theme overrides the default theme. If a value is present in the current theme, it
-/// will be used. If not, the value from the default theme will be used instead. For this reason,
-/// the current theme doesn't need to have all values, but only the ones you want to change from
-/// the default.
-///
-Map<ThemeRef, Object> _currentTheme = const {};
-
-/// The default theme usually defines all value, or is left empty.
-/// If a value is not present in the current theme and also not present in the default theme,
-/// the default value will be used instead Note the default value is optional, and it's defined
-/// when the value is created. For example:
-/// `static const errorColor = ColorRef('errorColor',  Color(0xFFCA2323));`
-///
-Map<ThemeRef, Object> _defaultTheme = const {};
-
-Color Function(Color)? _transformColor;
-
-TextStyle Function(TextStyle)? _transformTextStyle;
-
-/// Removes the current theme, falling back to the default theme.
-void _clearCurrentTheme() {
-  Themed._delayedThemeChangeByKey = null;
-  _currentTheme = const {};
-}
-
-/// Returns true if the given theme is equal to the current one.
-/// Note: To check if the default them is being used, do: `ifThemeIs({})`.
-bool _ifCurrentThemeIs(Map<ThemeRef, Object> theme) {
-  theme = toIdenticalKeyedMap(theme);
-  return mapEquals(theme, _currentTheme);
-}
-
-/// Sets a transform which will be applied to all colors.
-void _setTransformColor(Color Function(Color)? transform) {
-  _transformColor = transform;
-}
-
-/// Returns true if the given color transform is equal to the current one.
-bool _ifCurrentTransformColorIs(Color Function(Color)? transform) =>
-    identical(transform, _transformColor);
-
-/// Sets a transform which will be applied to all colors.
-void _setTransformTextStyle(TextStyle Function(TextStyle)? transform) {
-  _transformTextStyle = transform;
-}
-
-/// Returns true if the given text style transform is equal to the current one.
-bool _ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
-    identical(transform, _transformTextStyle);
 
 /// Instead of:
 ///
@@ -119,8 +70,8 @@ class Themed extends StatefulWidget {
     Map<ThemeRef, Object>? currentTheme,
     required this.child,
   }) : super(key: _themedKey) {
-    if (defaultTheme != null) _defaultTheme = toIdenticalKeyedMap(defaultTheme);
-    if (currentTheme != null) _currentTheme = toIdenticalKeyedMap(currentTheme);
+    if (defaultTheme != null) _defaultTheme = _toIdenticalKeyedMap(defaultTheme);
+    if (currentTheme != null) _currentTheme = _toIdenticalKeyedMap(currentTheme);
   }
 
   static void _setState() {
@@ -135,7 +86,7 @@ class Themed extends StatefulWidget {
   /// from the default.
   static set currentTheme(Map<ThemeRef, Object>? currentTheme) {
     _delayedThemeChangeByKey = null;
-    _currentTheme = toIdenticalKeyedMap(currentTheme);
+    _currentTheme = _toIdenticalKeyedMap(currentTheme);
     _setState();
   }
 
@@ -151,7 +102,7 @@ class Themed extends StatefulWidget {
   ///
   /// The default theme must define all used colors.
   static set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
-    _defaultTheme = toIdenticalKeyedMap(defaultTheme);
+    _defaultTheme = _toIdenticalKeyedMap(defaultTheme);
     _setState();
   }
 
@@ -306,7 +257,7 @@ class _ThemedState extends State<Themed> {
     Themed._delayedThemeChangeByKey = null;
     if (mounted)
       setState(() {
-        _currentTheme = toIdenticalKeyedMap(currentTheme);
+        _currentTheme = _toIdenticalKeyedMap(currentTheme);
         _rebuildAllChildren();
       });
   }
@@ -317,7 +268,7 @@ class _ThemedState extends State<Themed> {
   set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
     if (mounted)
       setState(() {
-        _defaultTheme = toIdenticalKeyedMap(defaultTheme);
+        _defaultTheme = _toIdenticalKeyedMap(defaultTheme);
         _rebuildAllChildren();
       });
   }
@@ -407,23 +358,6 @@ class _InheritedConstTheme extends InheritedWidget {
   bool updateShouldNotify(_InheritedConstTheme old) => true;
 }
 
-class ConstThemeException {
-  String msg;
-
-  ConstThemeException(this.msg);
-
-  @override
-  String toString() => msg;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ConstThemeException && runtimeType == other.runtimeType && msg == other.msg;
-
-  @override
-  int get hashCode => msg.hashCode;
-}
-
 class ColorRef extends Color implements ThemeRef {
   //
   final String? id;
@@ -501,7 +435,8 @@ class TextStyleRef extends TextStyle implements ThemeRef {
     TextStyle? result = _currentTheme[this] as TextStyle?;
     result ??= _defaultTheme[this] as TextStyle?;
     result ??= defaultTextStyle;
-    if (result == null) throw ConstThemeException('Theme text-style "$id" is not defined.');
+    if (result == null)
+      throw ConstThemeException('Theme text-style "$id" is not defined.');
     if (_transformTextStyle != null) result = _transformTextStyle!(result);
     return result;
   }
@@ -786,63 +721,77 @@ class TextStyleRef extends TextStyle implements ThemeRef {
   }
 }
 
-/// You can create color swatches from colors only (which you can later change):
+/// The current theme overrides the default theme. If a value is present in the current theme, it
+/// will be used. If not, the value from the default theme will be used instead. For this reason,
+/// the current theme doesn't need to have all values, but only the ones you want to change from
+/// the default.
 ///
-/// ```
-/// static const MaterialColor myColorSwatch = MaterialColorRef(
-///     AppColors.primary,
-///     <int, Color>{
-///       50: AppColors.primary,
-///       100: AppColors.primary,
-///       200: AppColors.primary,
-///       300: AppColors.primary,
-///       400: AppColors.primary,
-///       500: AppColors.primary,
-///       600: AppColors.primary,
-///       700: AppColors.primary,
-///       800: AppColors.primary,
-///       900: AppColors.primary,
-///     },
-/// );
-/// ```
-class MaterialColorSwatch extends MaterialColor {
-  final Color primary;
+Map<ThemeRef, Object> _currentTheme = const {};
 
-  const MaterialColorSwatch(this.primary, Map<int, Color> swatch) : super(0, swatch);
+/// The default theme usually defines all value, or is left empty.
+/// If a value is not present in the current theme and also not present in the default theme,
+/// the default value will be used instead Note the default value is optional, and it's defined
+/// when the value is created. For example:
+/// `static const errorColor = ColorRef('errorColor',  Color(0xFFCA2323));`
+///
+Map<ThemeRef, Object> _defaultTheme = const {};
 
-  @override
-  int get value => primary.value;
+Color Function(Color)? _transformColor;
+
+TextStyle Function(TextStyle)? _transformTextStyle;
+
+/// Removes the current theme, falling back to the default theme.
+void _clearCurrentTheme() {
+  Themed._delayedThemeChangeByKey = null;
+  _currentTheme = const {};
 }
 
-/// You can create color swatches from colors only (which you can later change):
-///
-/// ```
-/// static const MaterialColor myColorSwatch = MaterialAccentColorSwatch(
-///     AppColors.primary,
-///     <int, Color>{
-///       50: AppColors.primary,
-///       100: AppColors.primary,
-///       200: AppColors.primary,
-///       400: AppColors.primary,
-///       700: AppColors.primary,
-///     },
-/// );
-/// ```
-class MaterialAccentColorSwatch extends MaterialAccentColor {
-  final Color primary;
-
-  const MaterialAccentColorSwatch(this.primary, Map<int, Color> swatch) : super(0, swatch);
-
-  @override
-  int get value => primary.value;
+/// Returns true if the given theme is equal to the current one.
+/// Note: To check if the default them is being used, do: `ifThemeIs({})`.
+bool _ifCurrentThemeIs(Map<ThemeRef, Object> theme) {
+  theme = _toIdenticalKeyedMap(theme);
+  return mapEquals(theme, _currentTheme);
 }
 
-Map<ThemeRef, Object> toIdenticalKeyedMap(Map<ThemeRef, Object>? theme) {
+/// Sets a transform which will be applied to all colors.
+void _setTransformColor(Color Function(Color)? transform) {
+  _transformColor = transform;
+}
+
+/// Returns true if the given color transform is equal to the current one.
+bool _ifCurrentTransformColorIs(Color Function(Color)? transform) =>
+    identical(transform, _transformColor);
+
+/// Sets a transform which will be applied to all colors.
+void _setTransformTextStyle(TextStyle Function(TextStyle)? transform) {
+  _transformTextStyle = transform;
+}
+
+/// Returns true if the given text style transform is equal to the current one.
+bool _ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
+    identical(transform, _transformTextStyle);
+
+/// Converts a given Map<ThemeRef, Object>? to a new map with identical keys.
+///
+/// This is done to ensure that the keys in the map are compared by identity rather
+/// than by equality, which is important because ThemeRef values may have custom equality
+/// logic that could cause issues.
+///
+/// - If the input theme is null, it returns an empty map.
+/// - Otherwise, it creates a new map using Map<ThemeRef, Object>.identity(), which
+/// ensures that keys are compared by identity. It then iterates over the keys and values
+/// of the input map, adding them to the new map.
+///
+/// Finally, it returns the new map.
+/// This approach ensures that the keys in the resulting map are compared by their
+/// identity, avoiding potential issues with custom equality logic in ThemeRef values.
+///
+Map<ThemeRef, Object> _toIdenticalKeyedMap(Map<ThemeRef, Object>? theme) {
   if (theme == null)
     return const {};
   else {
-    // Note: We add the maps like this, because the original theme may have ThemeRef values
-    // which present our weird equality, so it may fail if we do it any other way.
+    // Note: We add the maps like this, because the original theme may have ThemeRef
+    // values which present our weird equality, so it may fail if we do it any other way.
     var result = Map<ThemeRef, Object>.identity();
     List<ThemeRef> keys = theme.keys.toList();
     List<Object> values = theme.values.toList();
