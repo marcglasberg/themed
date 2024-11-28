@@ -1,6 +1,6 @@
 name: themed
 description: The themed package lets you define a theme with const values, and then, by using some dark Dart magic, go and change them dynamically anyway.
-version: 6.0.0
+version: 7.0.0
 # author: Marcelo Glasberg <marcglasberg@gmail.com>
 homepage: https://github.com/marcglasberg/themed
 topics:
@@ -21,4 +21,3 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-

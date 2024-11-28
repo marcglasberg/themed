@@ -37,7 +37,7 @@ abstract class ThemeRef {}
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Themed(
-///       child: Scaffold( ... )
+///       child: Scaffold(...)
 ///   );
 /// }
 /// ```
@@ -47,7 +47,7 @@ abstract class ThemeRef {}
 /// ```dart
 /// return Themed(
 ///     defaultTheme: { ... },
-///     child: Scaffold( ... )
+///     child: Scaffold(...)
 /// ```
 ///
 class Themed extends StatefulWidget {
@@ -76,6 +76,9 @@ class Themed extends StatefulWidget {
 
   static void _setState() {
     _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
+
+    var context = _themedKey.currentContext;
+    if (context != null) _rebuildAllChildrenOfContext(context);
   }
 
   /// Same as `Themed.of(context).currentTheme = { ... };`
@@ -166,9 +169,10 @@ class Themed extends StatefulWidget {
     }
   }
 
+  /// Sets a transform which will be applied to all colors.
+  ///
   /// Same as `Themed.of(context).transformColor = ...;`
   ///
-  /// Sets a transform which will be applied to all colors.
   static set transformColor(Color Function(Color)? transform) {
     _setTransformColor(transform);
     _setState();
@@ -207,13 +211,13 @@ class Themed extends StatefulWidget {
   /// Note: To check if the default them is being used, do: `ifThemeIs({})`.
   static bool ifCurrentThemeIs(Map<ThemeRef, Object> theme) => _ifCurrentThemeIs(theme);
 
-  /// Same as `Themed.ifCurrentTransformColorIs( ... )`.
+  /// Same as `Themed.ifCurrentTransformColorIs(...)`.
   ///
   /// Returns true if the given color transform is equal to the current one.
   static bool ifCurrentTransformColorIs(Color Function(Color)? transform) =>
       _ifCurrentTransformColorIs(transform);
 
-  /// Same as `Themed.ifCurrentTransformTextStyleIs( ... )`.
+  /// Same as `Themed.ifCurrentTransformTextStyleIs(...)`.
   ///
   /// Returns true if the given text style transform is equal to the current one.
   static bool ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
@@ -262,48 +266,12 @@ class _ThemedState extends State<Themed> {
       });
   }
 
-  /// Same as `Themed.defaultTheme = { ... }`.
+  /// Removes the current theme, falling back to the default theme.
   ///
-  /// The default theme must define all used colors.
-  set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
-    if (mounted)
-      setState(() {
-        _defaultTheme = _toIdenticalKeyedMap(defaultTheme);
-        _rebuildAllChildren();
-      });
-  }
-
-  /// Same as `Themed.transformColor = ...`.
+  ///     Themed.of(context).clearCurrentTheme()
   ///
-  /// Sets a transform which will be applied to all colors.
-  set transformColor(Color Function(Color)? transform) {
-    if (mounted)
-      setState(() {
-        _setTransformColor(transform);
-        _rebuildAllChildren();
-      });
-  }
-
-  /// Same as `Themed.transformTextStyle = ...`.
-  ///
-  /// Sets a transform which will be applied to all text styles.
-  set transformTextStyle(TextStyle Function(TextStyle)? transform) {
-    if (mounted)
-      setState(() {
-        _setTransformTextStyle(transform);
-        _rebuildAllChildren();
-      });
-  }
-
-  /// Same as `Themed.ifCurrentThemeIs( ... )`.
-  ///
-  /// Returns true if the given theme is equal to the current one.
-  /// Note: To check if the default them is being used, do: `ifThemeIs({})`.
-  bool ifCurrentThemeIs(Map<ThemeRef, Object> theme) => _ifCurrentThemeIs(theme);
-
   /// Same as `Themed.clearCurrentTheme();`.
   ///
-  /// Removes the current theme, falling back to the default theme.
   void clearCurrentTheme() {
     if (mounted)
       setState(() {
@@ -312,22 +280,88 @@ class _ThemedState extends State<Themed> {
       });
   }
 
-  /// Same as `Themed.ifCurrentTransformColorIs( ... )`.
+  /// To set the default theme:
   ///
+  ///     Themed.of(context).defaultTheme = { ... };
+  ///
+  /// Same as `Themed.defaultTheme = { ... }`.
+  ///
+  /// Note the default theme MUST define all used colors.
+  ///
+  set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
+    if (mounted)
+      setState(() {
+        _defaultTheme = _toIdenticalKeyedMap(defaultTheme);
+        _rebuildAllChildren();
+      });
+  }
+
+  /// Sets a transform which will be applied to all colors:
+  ///
+  ///     Themed.of(context).transformColor = ...
+  ///
+  /// Same as `Themed.transformColor = ...`.
+  ///
+  set transformColor(Color Function(Color)? transform) {
+    if (mounted)
+      setState(() {
+        _setTransformColor(transform);
+        _rebuildAllChildren();
+      });
+  }
+
+  void clearTransformColor() {
+    transformColor = null;
+  }
+
+  /// Sets a transform which will be applied to all text styles:
+  ///
+  ///     Themed.of(context).transformTextStyle = ...
+  ///
+  /// Same as `Themed.transformTextStyle = ...`.
+  ///
+  set transformTextStyle(TextStyle Function(TextStyle)? transform) {
+    if (mounted)
+      setState(() {
+        _setTransformTextStyle(transform);
+        _rebuildAllChildren();
+      });
+  }
+
+  void clearTransformTextStyle() {
+    transformTextStyle = null;
+  }
+
+  /// Returns true if the given theme is equal to the current one.
+  /// Note: To check if the default them is being used, do: `ifThemeIs({})`.
+  ///
+  ///     Themed.of(context).ifCurrentThemeIs({...})
+  ///
+  /// Same as `Themed.ifCurrentThemeIs(...)`.
+  ///
+  bool ifCurrentThemeIs(Map<ThemeRef, Object> theme) => _ifCurrentThemeIs(theme);
+
   /// Returns true if the given color transform is equal to the current one.
+  ///
+  ///     Themed.of(context).ifCurrentTransformColorIs(...)
+  ///
+  /// Same as `Themed.ifCurrentTransformColorIs(...)`.
+  ///
   bool ifCurrentTransformColorIs(Color Function(Color)? transform) =>
       _ifCurrentTransformColorIs(transform);
 
-  /// Same as `Themed.ifCurrentTransformTextStyleIs( ... )`.
-  ///
   /// Returns true if the given text style transform is equal to the current one.
+  ///
+  ///     Themed.of(context).ifCurrentTransformTextStyleIs(...)
+  ///
+  /// Same as `Themed.ifCurrentTransformTextStyleIs(...)`.
+  ///
   bool ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
       _ifCurrentTransformTextStyleIs(transform);
 
   @override
   Widget build(BuildContext context) {
     return _InheritedConstTheme(
-      key: ValueKey<Object>(Object()), // ignore: prefer_const_constructors
       data: this,
       child: widget.child,
     );
@@ -335,12 +369,7 @@ class _ThemedState extends State<Themed> {
 
   /// See: https://stackoverflow.com/a/58513635/3411681
   void _rebuildAllChildren() {
-    void rebuild(Element el) {
-      el.markNeedsBuild();
-      el.visitChildren(rebuild);
-    }
-
-    (context as Element).visitChildren(rebuild);
+    _rebuildAllChildrenOfContext(context);
   }
 }
 
@@ -397,24 +426,36 @@ class ColorRef extends Color implements ThemeRef {
   /// The equality operator.
   ///
   /// Two [ColorRef]s are equal if they have the same [defaultColor] and [id].
-  /// Please note, the current color (that depends on the current theme)
-  /// is ignored.
+  /// Please note, the current color (that depends on the current theme) is irrelevant.
   ///
-  /// If you want to check equality for the [ColorRef]'s current color,
-  /// you can use its [color] or [value] getters. For example:
-  ///
-  /// * ColorRef(Colors.white).color == ColorRef(Colors.white).color // Is true
-  /// * ColorRef(Colors.white).color == Colors.white // Is true
-  /// * ColorRef(Colors.white) == Colors.white // Is false
+  /// To compare by current color (that depends on the current theme), use
+  /// method [sameColor] instead.
   ///
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      super == other &&
+  bool operator ==(Object other) {
+    //
+    // During theme changes, for one single frame, no color is considered
+    // the same as itself. This will make sure all colors rebuild.
+    if (identical(this, other))
+      return !_rebuilding;
+    //
+    else
+      return super == other &&
           other is ColorRef &&
           runtimeType == other.runtimeType &&
           id == other.id &&
           defaultColor == other.defaultColor;
+  }
+
+  /// Return true if [other] is a [ColorRef] or [Color] with the same color as
+  /// this one. Note: If [other] is a [ColorRef], the compared color is the current one,
+  /// i.e., the one that depend on the current theme.
+  ///
+  bool sameColor(Object other) {
+    return identical(this, other) ||
+        (other is ColorRef && value == other.value) ||
+        (other is Color && value == other.value);
+  }
 
   @override
   int get hashCode => id.hashCode ^ defaultColor.hashCode;
@@ -721,24 +762,43 @@ class TextStyleRef extends TextStyle implements ThemeRef {
   }
 }
 
-/// The current theme overrides the default theme. If a value is present in the current theme, it
-/// will be used. If not, the value from the default theme will be used instead. For this reason,
-/// the current theme doesn't need to have all values, but only the ones you want to change from
-/// the default.
-///
+/// The current theme overrides the default theme. If a value is present in the current
+/// theme, it will be used. If not, the value from the default theme will be used instead.
+/// For this reason, the current theme doesn't need to have all values, but only the ones
+/// you want to change from the default.
 Map<ThemeRef, Object> _currentTheme = const {};
 
-/// The default theme usually defines all value, or is left empty.
-/// If a value is not present in the current theme and also not present in the default theme,
-/// the default value will be used instead Note the default value is optional, and it's defined
-/// when the value is created. For example:
+/// The default theme usually defines all values (colors and text-styles), or is left
+/// empty.
+///
+/// If a value is not present in the current theme and also not present in the default
+/// theme, then the DEFAULT VALUE will be used instead. The default value is optional,
+/// and is that one defined when the value is created. For example, in
 /// `static const errorColor = ColorRef('errorColor',  Color(0xFFCA2323));`
+/// the default value is `Color(0xFFCA2323)`.
 ///
 Map<ThemeRef, Object> _defaultTheme = const {};
 
 Color Function(Color)? _transformColor;
 
 TextStyle Function(TextStyle)? _transformTextStyle;
+
+bool _rebuilding = false;
+
+void _rebuildAllChildrenOfContext(BuildContext context) {
+  void rebuild(Element el) {
+    el.markNeedsBuild();
+    el.visitChildren(rebuild);
+  }
+
+  _rebuilding = true;
+
+  (context as Element).visitChildren(rebuild);
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _rebuilding = false;
+  });
+}
 
 /// Removes the current theme, falling back to the default theme.
 void _clearCurrentTheme() {

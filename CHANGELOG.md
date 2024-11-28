@@ -1,8 +1,17 @@
-## 6.0.0
-
-* Sponsored by [MyText.ai](https://mytext.ai)
+Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
+
+## 7.0.0
+
+* Theme change improvement: Now, when a theme is changed, it will make all color
+  references different from themselves during exactly one frame. This will assure
+  that all widgets that depend on the theme will be rebuilt with the new theme.
+  While technically this is a breaking change, it's unlikely to affect you.
+
+* `ColorRef.sameColor()` method to compare the current color of two `ColorRef` objects,
+  or with a `Color` object. Note that the compared color is the effective one, that
+  depend on the current theme.
 
 ## 5.1.1
 
@@ -25,14 +34,12 @@
 ## 2.4.0
 
 * `ChangeColors` widget to change the brightness, saturation and hue of any widget,
-  including
-  images.
+  including images.
 
 ## 2.3.0
 
 * Color extension: `darker`, `lighter`, `average`, `decolorize`, `addOpacity`,
-  `rgbaToArgb`
-  and `abgrToArgb` methods.
+  `rgbaToArgb` and `abgrToArgb` methods.
 
 ## 2.2.0
 
@@ -41,26 +48,17 @@
 ## 2.1.0
 
 * Saving and setting themes by key: `Themed.save()`, `Themed.setThemeByKey()` etc.
+
 * Fixed https://github.com/marcglasberg/themed/issues/1
 
 ## 2.0.5
 
 * Compatible with Flutter 2.5.
 
-## 2.0.4
-
-* Docs improvements.
-* Small improvement for helping with tests.
-
 ## 2.0.1
 
 * Breaking change: The `id` now must only be provided if it's necessary to differentiate
   constants.
-
-## 1.0.1
-
-* Docs improvement.
-* First publish to pub.dev.
 
 ## 1.0.0
 
