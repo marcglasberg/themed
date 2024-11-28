@@ -160,8 +160,8 @@ class Themed extends StatefulWidget {
   static final Map<Object, Map<ThemeRef, Object>> _saved = {};
   static Object? _delayedThemeChangeByKey;
 
-  /// The [Themed] widget should wrap the [child] which contains the tree of
-  /// widgets you want to use the color theme. It' recommended that you provide a
+  /// The [Themed] widget should wrap the [child] that contains the tree of
+  /// widgets where you want to use the color theme. It is recommended to provide a
   /// [defaultTheme].
   ///
   Themed({
@@ -435,16 +435,14 @@ class _ThemedState extends State<Themed> {
 
   /// See: https://stackoverflow.com/a/58513635/3411681
   void _rebuildAllChildren() {
-    void rebuild(Element el) {
-      el.markNeedsBuild();
-      el.visitChildren(rebuild);
-    }
-
-    (context as Element).visitChildren(rebuild);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      WidgetsBinding.instance.reassembleApplication();
-    });
+    print('\n------------------------------------------------------------');
+    print('\n---------- _ThemedState._rebuildAllChildren ----------');
+    // void rebuild(Element el) {
+    //   el.markNeedsBuild();
+    //   el.visitChildren(rebuild);
+    // }
+    //
+    // (context as Element).visitChildren(rebuild);
   }
 }
 
