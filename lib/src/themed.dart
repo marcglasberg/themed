@@ -384,14 +384,12 @@ class _ThemedState extends State<Themed> {
 
   /// See: https://stackoverflow.com/a/58513635/3411681
   void _rebuildAllChildren() {
-    print('\n------------------------------------------------------------');
-    print('\n---------- _ThemedState._rebuildAllChildren ----------');
-    // void rebuild(Element el) {
-    //   el.markNeedsBuild();
-    //   el.visitChildren(rebuild);
-    // }
-    //
-    // (context as Element).visitChildren(rebuild);
+    void rebuild(Element el) {
+      el.markNeedsBuild();
+      el.visitChildren(rebuild);
+    }
+
+    (context as Element).visitChildren(rebuild);
   }
 }
 
