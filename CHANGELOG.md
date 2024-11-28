@@ -12,6 +12,8 @@ Sponsored by [MyText.ai](https://mytext.ai)
 * `ColorRef.sameColor()` method to compare the current color of two `ColorRef` objects,
   or with a `Color` object. Note that the compared color is the effective one, that
   depend on the current theme.
+             
+* Fixed bug that affected Hot Reload.
 
 ## 5.1.1
 
