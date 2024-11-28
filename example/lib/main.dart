@@ -34,6 +34,7 @@ class MyApp extends StatelessWidget {
     return Themed(
       child: MaterialApp(
         title: 'Themed example',
+        debugShowCheckedModeBanner: false,
         //
         // 1) The [Themed] package is compatible with [Theme] and [ThemeData]:
         theme: ThemeData(
@@ -59,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: MyTheme.color2,
         //
         // 2) We can use the `const` keyword:
         title: const Text('Themed example', style: MyTheme.mainStyle),
