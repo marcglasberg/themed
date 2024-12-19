@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:ui' as ui
     show
         ParagraphStyle,
@@ -8,12 +10,40 @@ import 'dart:ui' as ui
         TextLeadingDistribution,
         FontVariation;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:themed/src/const_theme_exception.dart';
 
 abstract class ThemeRef {}
 
+/// You must have a single [Themed] widget in your widget tree, above
+/// your [MaterialApp] or [CupertinoApp] widgets:
+///
+/// ```dart
+/// import 'package:themed/themed.dart';
+///
+/// Widget build(BuildContext context) {
+///   return Themed(
+///       child: MaterialApp(...)
+///   );
+/// }
+/// ```
+///
+/// You may, or may not, also provide a [defaultTheme] and a [currentTheme]:
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Themed(
+///       defaultTheme: { ... },
+///       currentTheme: { ... },
+///       child:
+///   );
+/// }
+/// ```
+///
+///  # Usage
+///
 /// Instead of:
 ///
 /// Container(
@@ -28,28 +58,6 @@ abstract class ThemeRef {}
 ///    child: Text("hello!", style: const AppStyle.title,
 /// );
 ///
-/// Wrap your widget tree with the `Themed` widget.
-/// Note, there must at most one single `Themed` widget in the tree.
-///
-/// ```dart
-/// import 'package:themed/themed.dart';
-///
-/// @override
-/// Widget build(BuildContext context) {
-///   return Themed(
-///       child: Scaffold(...)
-///   );
-/// }
-/// ```
-///
-/// You can provide a default theme theme, like this:
-///
-/// ```dart
-/// return Themed(
-///     defaultTheme: { ... },
-///     child: Scaffold(...)
-/// ```
-///
 class Themed extends StatefulWidget {
   //
   static final _themedKey = GlobalKey<_ThemedState>();
@@ -60,12 +68,48 @@ class Themed extends StatefulWidget {
   static final Map<Object, Map<ThemeRef, Object>> _saved = {};
   static Object? _delayedThemeChangeByKey;
 
-  /// The [Themed] widget should wrap the [child] that contains the tree of
-  /// widgets where you want to use the color theme. It is recommended to provide a
-  /// [defaultTheme].
+  /// You must have a single [Themed] widget in your widget tree, above
+  /// your [MaterialApp] or [CupertinoApp] widgets:
+  ///
+  /// ```dart
+  /// import 'package:themed/themed.dart';
+  ///
+  /// Widget build(BuildContext context) {
+  ///   return Themed(
+  ///       child: MaterialApp(...)
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// You may, or may not, also provide a [defaultTheme] and a [currentTheme]:
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Themed(
+  ///       defaultTheme: { ... },
+  ///       currentTheme: { ... },
+  ///       child: ...
+  ///   );
+  /// }
+  /// ```
+  ///
+  ///  # Usage
+  ///
+  /// Instead of:
+  ///
+  /// Container(
+  ///    color: Theme.of(context).warningColor,
+  ///    child: Text("hello!", style: Theme.of(context).titleTextStyle,
+  /// );
+  ///
+  /// You can write:
+  ///
+  /// Container(
+  ///    color: const AppColor.warning,
+  ///    child: Text("hello!", style: const AppStyle.title,
+  /// );
   ///
   Themed({
-    Key? key,
     Map<ThemeRef, Object>? defaultTheme,
     Map<ThemeRef, Object>? currentTheme,
     required this.child,
@@ -408,6 +452,15 @@ class ColorRef extends Color implements ThemeRef {
 
   Color get color => Color(value);
 
+  /// A 32 bit value representing this color.
+  ///
+  /// The bits are assigned as follows:
+  ///
+  /// * Bits 24-31 are the alpha value.
+  /// * Bits 16-23 are the red value.
+  /// * Bits 8-15 are the green value.
+  /// * Bits 0-7 are the blue value.
+  @Deprecated('Use component accessors like .r or .g.')
   @override
   int get value {
     Color? result = _currentTheme[this] as Color?;
@@ -416,6 +469,31 @@ class ColorRef extends Color implements ThemeRef {
     if (result == null) throw ConstThemeException('Theme color "$id" is not defined.');
     if (_transformColor != null) result = _transformColor!(result);
     return result.value;
+  }
+
+  /// The alpha channel of this color.
+  ///
+  /// A value of 0.0 means this color is fully transparent. A value of 1.0 means
+  /// this color is fully opaque.
+  @override
+  double get a => ((value >> 24) & 0xFF) / 255.0;
+
+  /// The red channel of this color.
+  @override
+  double get r {
+    return ((value >> 16) & 0xFF) / 255.0;
+  }
+
+  /// The green channel of this color.
+  @override
+  double get g {
+    return ((value >> 8) & 0xFF) / 255.0;
+  }
+
+  /// The blue channel of this color.
+  @override
+  double get b {
+    return (value & 0xFF) / 255.0;
   }
 
   @override

@@ -2,6 +2,18 @@ Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
+## 8.0.0
+
+* Version 8.0.0 is compatible with Flutter 3.27.0 and up. Note: Version 7.0.0 is not
+  compatible with the new Flutter versions, but it will not throw any errors. It will
+  just not work as expected. This means you MUST upgrade to the current version 8.0.0 as
+  soon as you upgrade your Flutter version:
+
+  ```yaml
+  dependencies:
+    themed: ^8.0.0
+  ``` 
+
 ## 7.0.0
 
 * Theme change improvement: Now, when a theme is changed, it will make all color
@@ -12,7 +24,7 @@ Sponsored by [MyText.ai](https://mytext.ai)
 * `ColorRef.sameColor()` method to compare the current color of two `ColorRef` objects,
   or with a `Color` object. Note that the compared color is the effective one, that
   depend on the current theme.
-             
+
 * Fixed bug that affected Hot Reload.
 
 ## 5.1.1
