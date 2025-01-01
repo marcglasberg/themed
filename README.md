@@ -1,6 +1,17 @@
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
-[![pub package](https://img.shields.io/pub/v/themed.svg)](https://pub.dartlang.org/packages/themed)
+[![Pub popularity](https://badgen.net/pub/popularity/themed)](https://pub.dev/packages/themed)
+[![Pub Version](https://img.shields.io/pub/v/themed?style=flat-square&logo=dart)](https://pub.dev/packages/themed)
+[![GitHub stars](https://img.shields.io/github/stars/marcglasberg/themed?style=social)](https://github.com/woltapp/themed)
+![Code Climate issues](https://img.shields.io/github/issues/marcglasberg/themed?style=flat-square)
+![GitHub closed issues](https://img.shields.io/github/issues-closed/marcglasberg/themed?style=flat-square)
+![GitHub contributors](https://img.shields.io/github/contributors/marcglasberg/themed?style=flat-square)
+![GitHub repo size](https://img.shields.io/github/repo-size/marcglasberg/themed?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/marcglasberg/themed?style=flat-square)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
+[![Developed by Marcelo Glasberg](https://img.shields.io/badge/Developed%20by%20Marcelo%20Glasberg-blue.svg)](https://glasberg.dev/)
+[![Wolt on pub.dev](https://img.shields.io/pub/publisher/themed.svg)](https://pub.dev/packages/glasberg.dev/publisher)
+[![Platforms](https://badgen.net/pub/flutter-platform/themed)](https://pub.dev/packages/themed)
 
 # themed
 
