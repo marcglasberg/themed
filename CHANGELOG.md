@@ -2,7 +2,7 @@ Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
-## 8.0.1
+## 8.0.2
 
 * Version 8 and up are compatible with Flutter 3.27.0 and up. Note: Version 7.0.0 is
   not compatible with the new Flutter versions, but it will not throw any errors. It will

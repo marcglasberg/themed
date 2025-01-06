@@ -1,8 +1,6 @@
-[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
-
 [![Pub popularity](https://badgen.net/pub/popularity/themed)](https://pub.dev/packages/themed)
 [![Pub Version](https://img.shields.io/pub/v/themed?style=flat-square&logo=dart)](https://pub.dev/packages/themed)
-[![GitHub stars](https://img.shields.io/github/stars/marcglasberg/themed?style=social)](https://github.com/woltapp/themed)
+[![GitHub stars](https://img.shields.io/github/stars/marcglasberg/themed?style=social)](https://github.com/marcglasberg/themed)
 ![Code Climate issues](https://img.shields.io/github/issues/marcglasberg/themed?style=flat-square)
 ![GitHub closed issues](https://img.shields.io/github/issues-closed/marcglasberg/themed?style=flat-square)
 ![GitHub contributors](https://img.shields.io/github/contributors/marcglasberg/themed?style=flat-square)
@@ -10,8 +8,12 @@
 ![GitHub forks](https://img.shields.io/github/forks/marcglasberg/themed?style=flat-square)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 [![Developed by Marcelo Glasberg](https://img.shields.io/badge/Developed%20by%20Marcelo%20Glasberg-blue.svg)](https://glasberg.dev/)
-[![Wolt on pub.dev](https://img.shields.io/pub/publisher/themed.svg)](https://pub.dev/packages/glasberg.dev/publisher)
+[![Glasberg.dev on pub.dev](https://img.shields.io/pub/publisher/async_redux.svg)](https://pub.dev/publishers/glasberg.dev/packages)
 [![Platforms](https://badgen.net/pub/flutter-platform/themed)](https://pub.dev/packages/themed)
+
+#### Sponsor
+
+[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
 # themed
 
@@ -484,3 +486,5 @@ _stackoverflow.com/users/3411681/marcg_</a>
   (versions: <a href="https://habr.com/ru/post/500210/">русский</a>)
 * <a href="https://medium.com/flutter-community/the-new-way-to-create-themes-in-your-flutter-app-7fdfc4f3df5f">
   The New Way to create Themes in your Flutter App</a> 
+
+[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
