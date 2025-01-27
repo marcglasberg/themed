@@ -118,6 +118,20 @@ class Themed extends StatefulWidget {
     if (currentTheme != null) _currentTheme = _toIdenticalKeyedMap(currentTheme);
   }
 
+  /// Calling [Themed.reset] will remove the entire widget tree inside [Themed] for one
+  /// frame, and then restore it, rebuilding everything. This can be helpful when some
+  /// widgets are not responding to theme changes. This is a brute-force method, and it's
+  /// not necessary in all cases.
+  /// A side effect is that the all stateful widgets below [Themed] will be recreated,
+  /// and their state reset by calling their `initState()` method. This means you should
+  /// only use this method if you don't mind loosing all this state, or if you have
+  /// mechanisms to recover it, like for example having the state come from above
+  /// the [Themed] widget.
+  static void reset() {
+    var homepageState = _themedKey.currentState;
+    homepageState?._reset();
+  }
+
   static void _setState() {
     _themedKey.currentState?.setState(() {}); // ignore: invalid_use_of_protected_member
 
@@ -403,12 +417,29 @@ class _ThemedState extends State<Themed> {
   bool ifCurrentTransformTextStyleIs(TextStyle Function(TextStyle)? transform) =>
       _ifCurrentTransformTextStyleIs(transform);
 
+  bool _isResetting = false;
+
+  void _reset() {
+    if (mounted) {
+      setState(() {
+        _isResetting = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() => _isResetting = false);
+        });
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return _InheritedConstTheme(
-      data: this,
-      child: widget.child,
-    );
+    if (_isResetting) {
+      return const SizedBox();
+    } else {
+      return _InheritedConstTheme(
+        data: this,
+        child: widget.child,
+      );
+    }
   }
 
   /// See: https://stackoverflow.com/a/58513635/3411681
@@ -784,7 +815,6 @@ class TextStyleRef extends TextStyle implements ThemeRef {
     TextScaler textScaler = TextScaler.noScaling,
   }) =>
       textStyle.getTextStyle(
-        // ignore: deprecated_member_use
         textScaleFactor: textScaleFactor,
         textScaler: textScaler,
       );

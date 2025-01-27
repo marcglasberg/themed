@@ -149,6 +149,16 @@ Themed.clearCurrentTheme();
 Themed.currentTheme = null;
 ```
 
+### Resetting
+
+Calling the static method `Themed.reset()` will remove the entire widget tree inside
+the `Themed` widget for one frame, and then restore it, rebuilding everything. This can
+be helpful when some widgets are not responding to theme changes. Usage of this method
+is not usually necessary. A side effect is that the all stateful widgets below `Themed`
+will be recreated, and you'll need to have mechanisms to recover their state, like for
+example having the state come from above `Themed` widget, or using a proper state
+management solution.
+
 # Organization
 
 You can also organize your theme in a class:
