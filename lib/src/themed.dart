@@ -285,7 +285,7 @@ class Themed extends StatefulWidget {
   /// print(Themed.of(context).theme);
   ///
   /// Setter:
-  /// Themed.of(context).theme = Locale("en", "US");
+  /// Themed.of(context).theme = { ... };
   ///
   static _ThemedState of(BuildContext context) {
     _InheritedConstTheme? inherited =

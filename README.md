@@ -1,4 +1,3 @@
-[![Pub popularity](https://badgen.net/pub/popularity/themed)](https://pub.dev/packages/themed)
 [![Pub Version](https://img.shields.io/pub/v/themed?style=flat-square&logo=dart)](https://pub.dev/packages/themed)
 [![GitHub stars](https://img.shields.io/github/stars/marcglasberg/themed?style=social)](https://github.com/marcglasberg/themed)
 ![Code Climate issues](https://img.shields.io/github/issues/marcglasberg/themed?style=flat-square)
