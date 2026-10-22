@@ -19,7 +19,8 @@
 The **Themed** package:
 
 * Lets you define a theme with **const** values, but change them dynamically anyway.
-* `ChangeColors` widget to change the brightness, saturation and hue of widgets or images.
+* `ChangeColors` widget to change the brightness, saturation, hue and opacity of widgets
+  or images, and `AnimatedChangeColors` to animate these changes.
 * Color extension methods like `decolorize`, `addOpacity`, `removeOpacity`,
   `darker`, `lighter`, `average` and more.
 * Static methods `ColorUtil.rgbaToArgb` and `ColorUtil.abgrToArgb`.
@@ -196,21 +197,56 @@ Themed.transformColor = ColorRef.shadesOfGreyTransform;
 Themed.clearTransformColor();
 ```
 
-# Changing brightness, saturation and hue of widgets or images.
+# Changing brightness, saturation, hue and opacity of widgets or images.
 
-Use the provided `ChangeColors` widget to change the brightness, saturation and hue of any
-widget, including images. Example:
+Use the provided `ChangeColors` widget to change the brightness, saturation, hue and opacity
+of any widget, including images. Example:
 
 ```
 ChangeColors(
    hue: 0.55,
    brightness: 0.2,
    saturation: 0.1,
+   opacity: 0.8,
    child: Image.asset('myImage.png'),
 );
 ```
 
+* `brightness`: Negative values make it darker (`-1` is darkest), and positive values make it
+  lighter. The default `0` is unchanged.
+* `saturation`: Negative values make it less saturated (`-1` is greyscale), and positive values
+  make it more saturated. The default `0` is unchanged.
+* `hue`: From `-1` to `1`, wrapping around. The default `0` is unchanged.
+* `opacity`: From `0` (invisible) to `1` (opaque). The default `1` is unchanged.
+
 To achieve a greyscale effect, you may also use the `ChangeColors.greyscale` constructor.
+
+## Animating the changes
+
+Use the `AnimatedChangeColors` widget to animate the changes, whenever any of the values change.
+Each value is animated independently, and you can use different curves and durations for when a
+value increases (`raisingCurve` and `raisingDuration`) and for when it decreases
+(`loweringCurve` and `loweringDuration`). The default curves are `Curves.easeInOut`, and the
+default durations are 200 milliseconds.
+
+For example, the code below turns the image greyscale and semi-transparent when it's disabled.
+Since the saturation goes from `0` to `-1` and the opacity goes from `1` to `0.5`, both values
+are decreasing, so they animate with `loweringCurve` during `loweringDuration`. When it's enabled
+again, they animate back with `raisingCurve` during `raisingDuration`:
+
+```
+AnimatedChangeColors(
+   saturation: isDisabled ? -1.0 : 0.0,
+   opacity: isDisabled ? 0.5 : 1.0,
+   raisingCurve: Curves.easeOut,
+   raisingDuration: const Duration(milliseconds: 300),
+   loweringCurve: Curves.easeIn,
+   loweringDuration: const Duration(milliseconds: 150),
+   child: Image.asset('myImage.png'),
+);
+```
+
+Note the initial values are not animated, only later changes are.
 
 _Note: This widget is based upon
 <a href="https://stackoverflow.com/questions/64639589/how-to-adjust-hue-saturation-and-brightness-of-an-image-in-flutter">

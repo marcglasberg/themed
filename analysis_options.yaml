@@ -39,6 +39,7 @@ analyzer:
     - '**/i18n/string_messages_***.dart'
     - '/**/i18n/string_messages_***.dart'
     - 'lib/src/http/**'
+    - build/**
 
 # https://github.com/dart-lang/linter/blob/master/example/all.yaml
 linter:

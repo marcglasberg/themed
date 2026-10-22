@@ -2,6 +2,16 @@ Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
+## 8.2.0
+
+* `ChangeColors` now accepts an `opacity` parameter, from `0` (invisible)
+  to `1` (opaque, unchanged). The default is `1`.
+
+* New `AnimatedChangeColors` widget, which animates changes to the brightness,
+  saturation, hue and opacity. Increasing values use `raisingCurve` and
+  `raisingDuration`, while decreasing values use `loweringCurve` and
+  `loweringDuration`. The defaults are `Curves.easeInOut` and 200 milliseconds.
+
 ## 8.1.1
 
 * `Themed.reset`
