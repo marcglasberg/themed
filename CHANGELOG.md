@@ -2,7 +2,18 @@ Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
-## 8.2.0
+## 8.3.0
+
+* `ChangeColors` and `AnimatedChangeColors` now accept a `contrast` parameter.
+  Negative values lower the contrast, moving all colors closer to the
+  `contrastCenter` grey, and positive values raise it. The defaults are
+  `0` (unchanged) and `0.5` (medium grey).
+
+* `ChangeColors` and `AnimatedChangeColors` now accept an `opacityFactor`
+  parameter, which makes dark and light colors fade at different speeds.
+  Less than `1` makes dark colors fade faster, and more than `1` makes light
+  colors fade faster. The default `1` fades all colors the same.
+  See the README for how to use this to make a button look disabled.
 
 * `ChangeColors` now accepts an `opacity` parameter, from `0` (invisible)
   to `1` (opaque, unchanged). The default is `1`.

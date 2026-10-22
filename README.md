@@ -19,8 +19,8 @@
 The **Themed** package:
 
 * Lets you define a theme with **const** values, but change them dynamically anyway.
-* `ChangeColors` widget to change the brightness, saturation, hue and opacity of widgets
-  or images, and `AnimatedChangeColors` to animate these changes.
+* `ChangeColors` widget to change the brightness, saturation, hue, contrast and opacity of
+  widgets or images, and `AnimatedChangeColors` to animate these changes.
 * Color extension methods like `decolorize`, `addOpacity`, `removeOpacity`,
   `darker`, `lighter`, `average` and more.
 * Static methods `ColorUtil.rgbaToArgb` and `ColorUtil.abgrToArgb`.
@@ -197,16 +197,17 @@ Themed.transformColor = ColorRef.shadesOfGreyTransform;
 Themed.clearTransformColor();
 ```
 
-# Changing brightness, saturation, hue and opacity of widgets or images.
+# Changing brightness, saturation, hue, contrast and opacity of widgets or images.
 
-Use the provided `ChangeColors` widget to change the brightness, saturation, hue and opacity
-of any widget, including images. Example:
+Use the provided `ChangeColors` widget to change the brightness, saturation, hue, contrast
+and opacity of any widget, including images. Example:
 
 ```
 ChangeColors(
    hue: 0.55,
    brightness: 0.2,
    saturation: 0.1,
+   contrast: -0.3,
    opacity: 0.8,
    child: Image.asset('myImage.png'),
 );
@@ -217,9 +218,55 @@ ChangeColors(
 * `saturation`: Negative values make it less saturated (`-1` is greyscale), and positive values
   make it more saturated. The default `0` is unchanged.
 * `hue`: From `-1` to `1`, wrapping around. The default `0` is unchanged.
+* `contrast`: Negative values lower the contrast, moving all colors closer to a grey
+  (`-1` turns everything into that grey), and positive values raise the contrast.
+  The default `0` is unchanged.
+* `contrastCenter`: The grey that colors move toward when you lower the contrast,
+  from `0` (black) to `1` (white). The default is `0.5` (medium grey).
 * `opacity`: From `0` (invisible) to `1` (opaque). The default `1` is unchanged.
+* `opacityFactor`: Makes dark and light colors fade at different speeds, when the opacity
+  is less than `1`. Less than `1` makes dark colors fade faster (good for light themes),
+  and more than `1` makes light colors fade faster (good for dark themes). For example,
+  with `0.5` the light colors keep twice the opacity of the dark colors. The default `1`
+  fades all colors the same.
 
 To achieve a greyscale effect, you may also use the `ChangeColors.greyscale` constructor.
+
+## Making a button look disabled
+
+Suppose you have a button with dark text and a light background, in a light theme,
+and you want it to look disabled. There are two good ways to do it.
+
+**Lower the contrast.** Turn it grey, and move all its colors closer to a light grey.
+The text becomes light grey, and the background stays light grey:
+
+```
+ChangeColors(
+   saturation: isDisabled ? -1.0 : 0.0,
+   contrast: isDisabled ? -0.6 : 0.0,
+   contrastCenter: 0.85,
+   child: MyButton(),
+);
+```
+
+**Make it transparent.** If you simply lower the opacity, the light background quickly
+disappears into the light screen, while the text is still easy to read. To fix this, use an
+`opacityFactor` less than `1`, so that the dark text fades faster than the light background:
+
+```
+ChangeColors(
+   saturation: isDisabled ? -1.0 : 0.0,
+   opacity: isDisabled ? 0.3 : 1.0,
+   opacityFactor: 0.3,
+   child: MyButton(),
+);
+```
+
+Use this second way if you want to see what's behind the button.
+Note `opacityFactor` works best with widgets that have a solid background, like buttons.
+
+In dark themes, do the opposite: use a dark `contrastCenter` (like `0.15`), or an
+`opacityFactor` greater than `1`.
 
 ## Animating the changes
 
