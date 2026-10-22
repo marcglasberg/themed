@@ -98,7 +98,9 @@ class ChangeColors extends StatelessWidget {
   ///
   /// * More than 1: Light colors fade faster than dark colors. For example,
   ///   with 2.0 the dark colors keep twice the opacity of the light colors.
-  ///   Good for dark themes.
+  ///
+  /// In dark themes, try values both below and above 1, and keep the one that
+  /// looks best. It depends on your colors.
   ///
   /// Why is this useful? Suppose a button with dark text and a light
   /// background, in a light screen. If you make it transparent, the light

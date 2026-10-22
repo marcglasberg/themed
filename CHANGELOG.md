@@ -2,7 +2,7 @@ Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
-## 8.3.0
+## 8.3.1
 
 * `ChangeColors` and `AnimatedChangeColors` now accept a `contrast` parameter.
   Negative values lower the contrast, moving all colors closer to the

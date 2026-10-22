@@ -226,9 +226,9 @@ ChangeColors(
 * `opacity`: From `0` (invisible) to `1` (opaque). The default `1` is unchanged.
 * `opacityFactor`: Makes dark and light colors fade at different speeds, when the opacity
   is less than `1`. Less than `1` makes dark colors fade faster (good for light themes),
-  and more than `1` makes light colors fade faster (good for dark themes). For example,
-  with `0.5` the light colors keep twice the opacity of the dark colors. The default `1`
-  fades all colors the same.
+  and more than `1` makes light colors fade faster. For example, with `0.5` the light
+  colors keep twice the opacity of the dark colors. The default `1` fades all colors
+  the same.
 
 To achieve a greyscale effect, you may also use the `ChangeColors.greyscale` constructor.
 
@@ -265,8 +265,9 @@ ChangeColors(
 Use this second way if you want to see what's behind the button.
 Note `opacityFactor` works best with widgets that have a solid background, like buttons.
 
-In dark themes, do the opposite: use a dark `contrastCenter` (like `0.15`), or an
-`opacityFactor` greater than `1`.
+In dark themes, use a dark `contrastCenter` (like `0.15`). For the `opacityFactor`, try
+values both below and above `1`, and keep the one that looks best. It depends on your
+colors: if your buttons are lighter than the screen, a value below `1` may still work best.
 
 ## Animating the changes
 
