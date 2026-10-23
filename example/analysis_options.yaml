@@ -46,7 +46,6 @@ analyzer:
 linter:
   rules:
     - always_declare_return_types
-    - always_require_non_null_named_parameters
     - annotate_overrides
     - avoid_empty_else
     - avoid_field_initializers_in_const_classes
@@ -83,7 +82,6 @@ linter:
     # - prefer_const_constructors_in_immutables
     - prefer_const_declarations
     - prefer_contains
-    - prefer_equal_for_default_values
     - prefer_final_fields
 #    - prefer_foreach
     - prefer_generic_function_type_aliases
