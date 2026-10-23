@@ -87,6 +87,53 @@ class ChangeColors extends StatelessWidget {
   /// Note: 1.0 is unchanged.
   final double opacity;
 
+  // INTERNAL NOTE (not part of the API docs): anti-aliasing problem.
+  //
+  // The correct result is: alpha' = alpha * (darkOpacity + delta * luminance).
+  // A ColorFilter.matrix sees each pixel unpremultiplied (color separated from alpha),
+  // and can only do sums, never multiply alpha by luminance. So the matrix in
+  // `_ColorFilterGenerator.contrastAndOpacityMatrix` is an approximation: the best one
+  // that never makes a pixel more opaque than it should be. It's exact for opaque and
+  // for transparent pixels, but translucent pixels of the colors that fade faster
+  // disappear. For example, the anti-aliased rounded corners of a dark button background
+  // become jagged. Two ways to make it exact, if we ever want to:
+  //
+  // 1. Paint the child twice (exact on all platforms). In a custom RenderProxyBox,
+  //    rasterize the child into a ui.Image on every paint, using the same technique as
+  //    Flutter's `_RenderSnapshotWidget._paintAndDetachToImage` (an OffsetLayer, a
+  //    PaintingContext, `stopRecordingIfNeeded`, and `offsetLayer.toImageSync`). Then:
+  //    `canvas.saveLayer`, draw the image normally, draw the image again with
+  //    `BlendMode.dstIn` and a color matrix whose alpha row is
+  //    `alpha' = darkOpacity + delta * luminance` (ignoring the original alpha), and
+  //    `canvas.restore`. Since dstIn works premultiplied (result = dst * srcAlpha), the
+  //    blending does the multiplication the matrix can't. Notes:
+  //    - Can't use SnapshotWidget itself: it caches the image, and doesn't update it
+  //      when the child changes.
+  //    - Can't paint the child twice without the image: a child with repaint boundaries
+  //      would add the same layer twice to the tree, which isn't allowed.
+  //    - Cost: one offscreen image per repaint. Only do it when opacityFactor != 1 and
+  //      opacity < 1, so all other cases keep the current fast path.
+  //    - Content that repaints by itself under its own RepaintBoundary (like a spinner)
+  //      won't trigger our paint, so it would look frozen. Platform views can't be
+  //      rasterized (see `offsetLayer.supportsRasterization()`), so fall back to the
+  //      matrix for them.
+  //    - Draw the image aligned to physical pixels, or it gets slightly blurry.
+  //
+  // 2. Fragment shader with `ImageFiltered(imageFilter: ui.ImageFilter.shader(...))`.
+  //    Exact and fast (all on the GPU, no image per repaint), and works with content that
+  //    repaints by itself. In the shader, the input texture is premultiplied, so:
+  //    `L = dot(rgb, lum) / a` and `out = color * (darkOpacity + delta * L)`. Downsides:
+  //    - Only works with Impeller (`ui.ImageFilter.isShaderFilterSupported`). On Skia
+  //      (web, Windows, Linux, older Android devices) it throws, so we'd still need the
+  //      matrix (or option 1) as a fallback.
+  //    - Needs a newer minimum Flutter version (today the package allows >=3.16), and a
+  //      .frag file declared under `flutter: shaders:` in pubspec.yaml, loaded with
+  //      `FragmentProgram.fromAsset('packages/themed/shaders/...')`. Loading is async,
+  //      so the first frames must use the fallback.
+  //    - The first uniform must be a vec2 (the texture size, set by the engine), and
+  //      there must be a sampler2D. On Impeller with OpenGL ES the y-axis is flipped,
+  //      so the shader must invert it there.
+  //
   /// Makes dark and light colors fade at different speeds, when the [opacity]
   /// is less than 1:
   ///
