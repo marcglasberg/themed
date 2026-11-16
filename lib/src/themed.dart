@@ -114,8 +114,8 @@ class Themed extends StatefulWidget {
     Map<ThemeRef, Object>? currentTheme,
     required this.child,
   }) : super(key: _themedKey) {
-    if (defaultTheme != null) _defaultTheme = _toIdenticalKeyedMap(defaultTheme);
-    if (currentTheme != null) _currentTheme = _toIdenticalKeyedMap(currentTheme);
+    if (defaultTheme != null) _setDefaultTheme(defaultTheme);
+    if (currentTheme != null) _setCurrentTheme(currentTheme);
   }
 
   /// Calling [Themed.reset] will remove the entire widget tree inside [Themed] for one
@@ -147,7 +147,7 @@ class Themed extends StatefulWidget {
   /// from the default.
   static set currentTheme(Map<ThemeRef, Object>? currentTheme) {
     _delayedThemeChangeByKey = null;
-    _currentTheme = _toIdenticalKeyedMap(currentTheme);
+    _setCurrentTheme(currentTheme);
     _setState();
   }
 
@@ -163,7 +163,7 @@ class Themed extends StatefulWidget {
   ///
   /// The default theme must define all used colors.
   static set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
-    _defaultTheme = _toIdenticalKeyedMap(defaultTheme);
+    _setDefaultTheme(defaultTheme);
     _setState();
   }
 
@@ -319,7 +319,7 @@ class _ThemedState extends State<Themed> {
     Themed._delayedThemeChangeByKey = null;
     if (mounted)
       setState(() {
-        _currentTheme = _toIdenticalKeyedMap(currentTheme);
+        _setCurrentTheme(currentTheme);
         _rebuildAllChildren();
       });
   }
@@ -349,7 +349,7 @@ class _ThemedState extends State<Themed> {
   set defaultTheme(Map<ThemeRef, Object>? defaultTheme) {
     if (mounted)
       setState(() {
-        _defaultTheme = _toIdenticalKeyedMap(defaultTheme);
+        _setDefaultTheme(defaultTheme);
         _rebuildAllChildren();
       });
   }
@@ -477,8 +477,12 @@ class ColorRef extends Color implements ThemeRef {
   /// Transform that removes the colors, leaving only shades of gray.
   /// Use it like this: `Themed.setTransform(ColorRef.shadesOfGrey);`
   static Color shadesOfGreyTransform(Color color) {
-    int average = (color.red + color.green + color.blue) ~/ 3;
-    return Color.fromARGB(color.alpha, average, average, average);
+    // Note: This transform runs each time a theme color is used, so it must be fast.
+    // We read the color value only once, as it's calculated each time it's read (and
+    // getters like `color.red` read it again).
+    final int argb = color.value;
+    final int average = (((argb >> 16) & 0xFF) + ((argb >> 8) & 0xFF) + (argb & 0xFF)) ~/ 3;
+    return Color.fromARGB(argb >> 24, average, average, average);
   }
 
   Color get color => Color(value);
@@ -494,13 +498,34 @@ class ColorRef extends Color implements ThemeRef {
   @Deprecated('Use component accessors like .r or .g.')
   @override
   int get value {
+    //
+    // Colors are read all the time (Flutter reads the 4 channels of a color each time
+    // it paints it, and each channel reads this value), so we cache the value.
+    final Color Function(Color)? transform = _transformColor;
+    if (transform == null) {
+      final int? cached = _colorCache[this];
+      if (cached != null) return cached;
+    }
+
     Color? result = _currentTheme[this] as Color?;
     result ??= _defaultTheme[this] as Color?;
     result ??= defaultColor;
     if (result == null) throw ConstThemeException('Theme color "$id" is not defined.');
-    if (_transformColor != null) result = _transformColor!(result);
-    return result.value;
+
+    // Not cached: The transform may depend on something else, that changes.
+    if (transform != null) return transform(result).value;
+
+    // Note: We only get here the first time each color is used after the themes change
+    // (or every time, for the colors that didn't fit in the cache).
+    final int value = result.value;
+    if (_colorCache.length < _colorCacheMaxSize) _colorCache[this] = value;
+    return value;
   }
+
+  /// Same as [value]. Note: The default implementation would calculate it from
+  /// the 4 color channels, and each one of them would resolve the color in the theme.
+  @override
+  int toARGB32() => value;
 
   /// The alpha channel of this color.
   ///
@@ -548,12 +573,16 @@ class ColorRef extends Color implements ThemeRef {
     if (identical(this, other))
       return !_rebuilding;
     //
+    // The cheap checks go first, as the last one compares the current colors, and needs
+    // to resolve both of them in the theme. Note: Comparing the [value]s is the same as
+    // `super == other` (which compares the 4 color channels), but resolves each color
+    // only once, instead of 4 times.
     else
-      return super == other &&
-          other is ColorRef &&
+      return other is ColorRef &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          defaultColor == other.defaultColor;
+          defaultColor == other.defaultColor &&
+          value == other.value;
   }
 
   /// Return true if [other] is a [ColorRef] or [Color] with the same color as
@@ -889,6 +918,25 @@ Map<ThemeRef, Object> _defaultTheme = const {};
 
 Color Function(Color)? _transformColor;
 
+/// The current value of each [ColorRef] that was already used, so that it doesn't need
+/// to be searched in the themes (and converted to a 32 bit value) each time it's used.
+///
+/// - It's cleared when the current or the default theme change.
+///
+/// - It's not used at all while there is a color transform ([_transformColor]).
+///
+/// - Its size is limited to [_colorCacheMaxSize] colors. When it's full, the colors that
+///   are not in it simply don't use the cache (until the themes change, and it's cleared).
+///   This should not happen in a regular app, where the colors are const, but it
+///   prevents the cache from growing forever in an app that keeps creating non-const
+///   [ColorRef]s.
+///
+final Map<ColorRef, int> _colorCache = Map<ColorRef, int>.identity();
+
+/// The maximum number of colors in the [_colorCache]. It's more than the number
+/// of theme colors an app should have.
+const int _colorCacheMaxSize = 500;
+
 TextStyle Function(TextStyle)? _transformTextStyle;
 
 bool _rebuilding = false;
@@ -908,17 +956,40 @@ void _rebuildAllChildrenOfContext(BuildContext context) {
   });
 }
 
+/// Sets the current theme. If it's null, removes it.
+void _setCurrentTheme(Map<ThemeRef, Object>? theme) {
+  _currentTheme = _toIdenticalKeyedMap(theme);
+  _clearColorCache();
+}
+
+/// Sets the default theme. If it's null, removes it.
+void _setDefaultTheme(Map<ThemeRef, Object>? theme) {
+  _defaultTheme = _toIdenticalKeyedMap(theme);
+  _clearColorCache();
+}
+
 /// Removes the current theme, falling back to the default theme.
 void _clearCurrentTheme() {
   Themed._delayedThemeChangeByKey = null;
-  _currentTheme = const {};
+  _setCurrentTheme(null);
+}
+
+/// Must be called when the themes change, as the colors may have changed.
+void _clearColorCache() {
+  _colorCache.clear();
 }
 
 /// Returns true if the given theme is equal to the current one.
 /// Note: To check if the default them is being used, do: `ifThemeIs({})`.
 bool _ifCurrentThemeIs(Map<ThemeRef, Object> theme) {
-  theme = _toIdenticalKeyedMap(theme);
-  return mapEquals(theme, _currentTheme);
+  if (theme.length != _currentTheme.length) return false;
+
+  // Note: The current theme is keyed by identity, so we look up the keys of the given
+  // theme in it (and not the other way around). There is no need to copy the given theme.
+  for (final MapEntry<ThemeRef, Object> entry in theme.entries) {
+    if (_currentTheme[entry.key] != entry.value) return false;
+  }
+  return true;
 }
 
 /// Sets a transform which will be applied to all colors.

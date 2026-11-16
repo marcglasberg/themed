@@ -6,41 +6,79 @@ import 'package:themed/themed.dart';
 void main() {
   const child = RepaintBoundary(child: ColoredBox(color: Colors.red));
 
-  final cases = <String, ChangeColors Function()>{
-    'defaults': () => ChangeColors(child: child),
-    'unused contrast center': () =>
-        ChangeColors(contrastCenter: 0.9, child: child),
-    'unused opacity factor': () => ChangeColors(opacityFactor: 0, child: child),
-    'brightness': () => ChangeColors(brightness: 0.2, child: child),
-    'saturation': () => ChangeColors(saturation: -0.5, child: child),
-    'hue': () => ChangeColors(hue: 0.4, child: child),
-    'contrast': () => ChangeColors(contrast: -0.4, child: child),
-    'weighted opacity': () =>
-        ChangeColors(opacity: 0.5, opacityFactor: 2, child: child),
-    'greyscale': () => ChangeColors.greyscale(child: child),
-    'all filters': () => ChangeColors(
-        brightness: 0.2,
-        saturation: -0.5,
-        hue: 0.4,
-        contrast: -0.4,
-        child: child),
+  // Each case has the widget, and its expected number of color filter layers.
+  final cases = <String, (ChangeColors Function(), int)>{
+    'defaults': (() => ChangeColors(child: child), 0),
+    'unused contrast center': (
+      () => ChangeColors(contrastCenter: 0.9, child: child),
+      0
+    ),
+    'unused opacity factor': (
+      () => ChangeColors(opacityFactor: 0, child: child),
+      0
+    ),
+    'brightness': (() => ChangeColors(brightness: 0.2, child: child), 1),
+    'saturation': (() => ChangeColors(saturation: -0.5, child: child), 1),
+    'hue': (() => ChangeColors(hue: 0.4, child: child), 1),
+    'contrast': (() => ChangeColors(contrast: -0.4, child: child), 1),
+    'weighted opacity': (
+      () => ChangeColors(opacity: 0.5, opacityFactor: 2, child: child),
+      1
+    ),
+    'greyscale': (() => ChangeColors.greyscale(child: child), 1),
+    'all filters': (
+      () => ChangeColors(
+          brightness: 0.2,
+          saturation: 0.5,
+          hue: 0.4,
+          contrast: -0.4,
+          child: child),
+      4
+    ),
+
+    // Removing saturation shares the layer of the next filter.
+    'all filters, removing saturation': (
+      () => ChangeColors(
+          brightness: 0.2,
+          saturation: -0.5,
+          hue: 0.4,
+          contrast: -0.4,
+          child: child),
+      3
+    ),
+    'removing saturation, and brightness': (
+      () => ChangeColors(saturation: -0.5, brightness: 0.2, child: child),
+      1
+    ),
+    'removing saturation, and contrast': (
+      () => ChangeColors(saturation: -1, contrast: -0.4, child: child),
+      1
+    ),
+    'removing saturation, and weighted opacity': (
+      () => ChangeColors.greyscale(
+          opacity: 0.5, opacityFactor: 0.5, child: child),
+      1
+    ),
+    'removing saturation, and hue': (
+      () => ChangeColors(saturation: -0.5, hue: 0.4, child: child),
+      2
+    ),
+    'adding saturation, and contrast': (
+      () => ChangeColors(saturation: 0.5, contrast: -0.4, child: child),
+      2
+    ),
   };
 
   for (final entry in cases.entries) {
     testWidgets('Only active layers: ${entry.key}.', (tester) async {
-      await tester.pumpWidget(entry.value());
-      final expected = entry.key == 'all filters'
-          ? 4
-          : ['defaults', 'unused contrast center', 'unused opacity factor']
-                  .contains(entry.key)
-              ? 0
-              : 1;
+      final (build, expected) = entry.value;
+      await tester.pumpWidget(build());
       expect(tester.layers.whereType<ColorFilterLayer>(), hasLength(expected));
 
       // Update the same render objects, discard old layers, then re-enable them.
       await tester.pumpWidget(ChangeColors(child: child));
       expect(tester.layers.whereType<ColorFilterLayer>(), isEmpty);
-      await tester.pumpWidget(entry.value());
+      await tester.pumpWidget(build());
       expect(tester.layers.whereType<ColorFilterLayer>(), hasLength(expected));
       expect(tester.takeException(), isNull);
     });
@@ -108,9 +146,10 @@ void main() {
     expect(tester.layers.whereType<ColorFilterLayer>(), isEmpty);
     expect(tester.state(find.byType(_StateProbe)), same(state));
 
+    // Removing saturation shares the layer of the next filter (brightness).
     await tester.pumpWidget(build(-0.4));
     await tester.pumpAndSettle();
-    expect(tester.layers.whereType<ColorFilterLayer>(), hasLength(4));
+    expect(tester.layers.whereType<ColorFilterLayer>(), hasLength(3));
     expect(tester.state(find.byType(_StateProbe)), same(state));
     expect(tester.takeException(), isNull);
   });

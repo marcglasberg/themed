@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -213,91 +214,151 @@ class ChangeColors extends StatelessWidget {
     final bool useOpacityWidget = (opacityFactor == 1.0) || (opacity == 0.0);
 
     // Keep every element in place so toggling a filter never remounts the child.
-    // Neutral filters bypass compositing instead of adding identity filter layers.
-    final matrixOpacity = useOpacityWidget ? 1.0 : opacity;
     return Opacity(
       opacity: useOpacityWidget ? opacity : 1.0,
-      child: _OptionalColorFilter(
-        colorFilter: contrast == 0.0 && matrixOpacity == 1.0
+      child: _ColorFilters(
+        filters: _filters(matrixOpacity: useOpacityWidget ? 1.0 : opacity),
+        child: child,
+      ),
+    );
+  }
+
+  /// Returns the filters that are not neutral, from the outermost (applied
+  /// last) to the innermost (applied first). The order in which they are
+  /// applied is: hue, saturation, brightness, and then contrast and opacity.
+  ///
+  /// Each filter needs its own offscreen layer, which is expensive to draw.
+  /// For this reason, neutral filters are left out.
+  List<ColorFilter> _filters({required double matrixOpacity}) {
+    //
+    List<double>? contrastAndOpacityMatrix =
+        (contrast == 0.0 && matrixOpacity == 1.0)
             ? null
-            : ColorFilter.matrix(_ColorFilterGenerator.contrastAndOpacityMatrix(
+            : _ColorFilterGenerator.contrastAndOpacityMatrix(
                 contrast: contrast,
                 contrastCenter: contrastCenter,
                 opacity: matrixOpacity,
                 opacityFactor: opacityFactor,
-              )),
-        child: _OptionalColorFilter(
-          colorFilter: brightness == 0.0
-              ? null
-              : ColorFilter.matrix(_ColorFilterGenerator.brightnessAdjustMatrix(
-                  value: brightness)),
-          child: _OptionalColorFilter(
-            colorFilter: saturation == 0.0
-                ? null
-                : ColorFilter.matrix(
-                    _ColorFilterGenerator.saturationAdjustMatrix(
-                        value: saturation)),
-            child: _OptionalColorFilter(
-              colorFilter: hue == 0.0
-                  ? null
-                  : ColorFilter.matrix(
-                      _ColorFilterGenerator.hueAdjustMatrix(value: hue)),
-              child: child,
-            ),
-          ),
-        ),
-      ),
-    );
+              );
+
+    List<double>? brightnessMatrix = (brightness == 0.0)
+        ? null
+        : _ColorFilterGenerator.brightnessAdjustMatrix(value: brightness);
+
+    List<double>? saturationMatrix = (saturation == 0.0)
+        ? null
+        : _ColorFilterGenerator.saturationAdjustMatrix(value: saturation);
+
+    // Removing saturation only mixes each color with its own grey, so its
+    // result is always a valid color, and nothing is clamped before the next
+    // filter is applied. This means we can join it with the next filter into
+    // a single matrix, which gives the same result with one less layer.
+    //
+    // Note: This is not true for the other filters. They can go outside of
+    // the valid color range, and are clamped between one filter and the next,
+    // so joining them would change the result.
+    if (saturationMatrix != null && saturation < 0.0) {
+      if (brightnessMatrix != null) {
+        brightnessMatrix =
+            _ColorFilterGenerator.concat(saturationMatrix, brightnessMatrix);
+        saturationMatrix = null;
+      } else if (contrastAndOpacityMatrix != null) {
+        contrastAndOpacityMatrix = _ColorFilterGenerator.concat(
+            saturationMatrix, contrastAndOpacityMatrix);
+        saturationMatrix = null;
+      }
+    }
+
+    return <ColorFilter>[
+      if (contrastAndOpacityMatrix != null)
+        ColorFilter.matrix(contrastAndOpacityMatrix),
+      if (brightnessMatrix != null) ColorFilter.matrix(brightnessMatrix),
+      if (saturationMatrix != null) ColorFilter.matrix(saturationMatrix),
+      if (hue != 0.0)
+        ColorFilter.matrix(_ColorFilterGenerator.hueAdjustMatrix(value: hue)),
+    ];
   }
 }
 
-/// A stable element whose render object only composites an active filter.
-class _OptionalColorFilter extends SingleChildRenderObjectWidget {
-  const _OptionalColorFilter({required this.colorFilter, required super.child});
+/// Applies the given [filters] to the child, from the last (innermost) to the
+/// first (outermost). When there are no filters, it only paints the child.
+///
+/// It's a single element with a single render object, no matter how many
+/// filters there are, so that turning filters on and off never remounts
+/// the child.
+class _ColorFilters extends SingleChildRenderObjectWidget {
+  const _ColorFilters({required this.filters, required super.child});
 
-  final ColorFilter? colorFilter;
+  final List<ColorFilter> filters;
 
   @override
   RenderObject createRenderObject(BuildContext context) =>
-      _RenderOptionalColorFilter(colorFilter);
+      _RenderColorFilters(filters);
 
   @override
   void updateRenderObject(
-      BuildContext context, covariant _RenderOptionalColorFilter renderObject) {
-    renderObject.colorFilter = colorFilter;
+      BuildContext context, covariant _RenderColorFilters renderObject) {
+    renderObject.filters = filters;
   }
 }
 
-class _RenderOptionalColorFilter extends RenderProxyBox {
-  _RenderOptionalColorFilter(this._colorFilter);
+class _RenderColorFilters extends RenderProxyBox {
+  _RenderColorFilters(this._filters);
 
-  ColorFilter? _colorFilter;
+  List<ColorFilter> _filters;
 
-  set colorFilter(ColorFilter? value) {
-    if (_colorFilter == value) return;
-    final wasEnabled = _colorFilter != null;
-    _colorFilter = value;
-    if (wasEnabled != (value != null)) markNeedsCompositingBitsUpdate();
+  /// The layers of the filters, in the same order, kept to be reused in the
+  /// next paint. It may have less layers than filters (before painting), or
+  /// more (after filters are removed, until the next paint).
+  final List<LayerHandle<ColorFilterLayer>> _layers = [];
+
+  set filters(List<ColorFilter> value) {
+    if (listEquals(_filters, value)) return;
+    final hadFilters = _filters.isNotEmpty;
+    _filters = value;
+    if (hadFilters != value.isNotEmpty) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
   @override
-  bool get alwaysNeedsCompositing => child != null && _colorFilter != null;
+  bool get alwaysNeedsCompositing => child != null && _filters.isNotEmpty;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final filter = _colorFilter;
-    if (filter == null) {
-      layer = null;
-      super.paint(context, offset);
-    } else {
-      layer = context.pushColorFilter(
-        offset,
-        filter,
-        super.paint,
-        oldLayer: layer as ColorFilterLayer?,
-      );
+    // Discards the layers of filters that were removed.
+    while (_layers.length > _filters.length) {
+      _layers.removeLast().layer = null;
     }
+    _paintFrom(0, context, offset);
+  }
+
+  /// Paints the child inside of the filters, starting from the filter with
+  /// the given [index]. Each filter is a layer that contains the next one.
+  void _paintFrom(int index, PaintingContext context, Offset offset) {
+    if (index == _filters.length) {
+      super.paint(context, offset);
+      return;
+    }
+
+    if (index == _layers.length) _layers.add(LayerHandle<ColorFilterLayer>());
+    final handle = _layers[index];
+
+    handle.layer = context.pushColorFilter(
+      offset,
+      _filters[index],
+      (PaintingContext context, Offset offset) =>
+          _paintFrom(index + 1, context, offset),
+      oldLayer: handle.layer,
+    );
+  }
+
+  @override
+  void dispose() {
+    for (final handle in _layers) {
+      handle.layer = null;
+    }
+    _layers.clear();
+    super.dispose();
   }
 }
 
@@ -399,27 +460,17 @@ class _AnimatedChangeColorsState extends State<AnimatedChangeColors>
   late final _AnimatedValue _contrastCenter;
   late final _AnimatedValue _opacity;
   late final _AnimatedValue _opacityFactor;
-  late final Listenable _listenable;
 
   @override
   void initState() {
     super.initState();
-    _brightness = _AnimatedValue(widget.brightness, this);
-    _saturation = _AnimatedValue(widget.saturation, this);
-    _hue = _AnimatedValue(widget.hue, this);
-    _contrast = _AnimatedValue(widget.contrast, this);
-    _contrastCenter = _AnimatedValue(widget.contrastCenter, this);
-    _opacity = _AnimatedValue(widget.opacity, this);
-    _opacityFactor = _AnimatedValue(widget.opacityFactor, this);
-    _listenable = Listenable.merge([
-      _brightness.controller,
-      _saturation.controller,
-      _hue.controller,
-      _contrast.controller,
-      _contrastCenter.controller,
-      _opacity.controller,
-      _opacityFactor.controller,
-    ]);
+    _brightness = _AnimatedValue(widget.brightness);
+    _saturation = _AnimatedValue(widget.saturation);
+    _hue = _AnimatedValue(widget.hue);
+    _contrast = _AnimatedValue(widget.contrast);
+    _contrastCenter = _AnimatedValue(widget.contrastCenter);
+    _opacity = _AnimatedValue(widget.opacity);
+    _opacityFactor = _AnimatedValue(widget.opacityFactor);
   }
 
   @override
@@ -441,8 +492,13 @@ class _AnimatedChangeColorsState extends State<AnimatedChangeColors>
       raisingDuration: widget.raisingDuration,
       loweringCurve: widget.loweringCurve,
       loweringDuration: widget.loweringDuration,
+      vsync: this,
+      onTick: _rebuild,
     );
   }
+
+  /// Called in each frame, while any of the values is animating.
+  void _rebuild() => setState(() {});
 
   @override
   void dispose() {
@@ -458,19 +514,15 @@ class _AnimatedChangeColorsState extends State<AnimatedChangeColors>
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _listenable,
+    return ChangeColors(
+      brightness: _brightness.value,
+      saturation: _saturation.value,
+      hue: _hue.value,
+      contrast: _contrast.value,
+      contrastCenter: _contrastCenter.value,
+      opacity: _opacity.value,
+      opacityFactor: _opacityFactor.value,
       child: widget.child,
-      builder: (BuildContext context, Widget? child) => ChangeColors(
-        brightness: _brightness.value,
-        saturation: _saturation.value,
-        hue: _hue.value,
-        contrast: _contrast.value,
-        contrastCenter: _contrastCenter.value,
-        opacity: _opacity.value,
-        opacityFactor: _opacityFactor.value,
-        child: child!,
-      ),
     );
   }
 }
@@ -479,29 +531,39 @@ class _AnimatedChangeColorsState extends State<AnimatedChangeColors>
 /// can use its own curve and duration, according to its direction.
 class _AnimatedValue {
   //
-  final AnimationController controller;
+  /// Only created when the value is animated for the first time. Most values
+  /// are never animated, so this avoids creating (and later disposing) one
+  /// controller and one ticker for each one of them.
+  AnimationController? _controller;
+
   double _begin;
   double _end;
   Curve _curve = Curves.linear;
 
-  _AnimatedValue(double initialValue, TickerProvider vsync)
+  _AnimatedValue(double initialValue)
       : _begin = initialValue,
-        _end = initialValue,
-        controller = AnimationController(vsync: vsync, value: 1.0);
+        _end = initialValue;
 
   /// The current value.
   double get value {
+    final controller = _controller;
+    if (controller == null || _begin == _end) return _end;
+
     final t = controller.value;
-    if (_begin == _end || t >= 1.0) return _end;
+    if (t >= 1.0) return _end;
     return _begin + (_end - _begin) * _curve.transform(t);
   }
 
+  /// Animates the value to the given [target]. While it animates, [onTick] is
+  /// called in each frame.
   void animateTo(
     double target, {
     required Curve raisingCurve,
     required Duration raisingDuration,
     required Curve loweringCurve,
     required Duration loweringDuration,
+    required TickerProvider vsync,
+    required VoidCallback onTick,
   }) {
     if (target == _end) return;
 
@@ -515,53 +577,36 @@ class _AnimatedValue {
     final duration = isRaising ? raisingDuration : loweringDuration;
 
     if (duration == Duration.zero || current == target) {
-      controller.stop();
-      controller.value = 1.0;
+      // Jumps to the target. Note: Setting the value also stops the controller.
+      _controller?.value = 1.0;
     } else {
+      final controller = _controller ??= AnimationController(vsync: vsync)
+        ..addListener(onTick);
       controller.duration = duration;
       controller.forward(from: 0.0);
     }
   }
 
-  void dispose() => controller.dispose();
+  void dispose() => _controller?.dispose();
 }
 
+/// Creates the matrices of the color filters. Each matrix has 4 rows (the red,
+/// green, blue and alpha of the resulting color), and 5 columns (how much of
+/// the red, green, blue and alpha of the original color goes into it, plus an
+/// offset from 0 to 255).
 class _ColorFilterGenerator {
   //
+  /// Note: The [value] can't be zero (use no filter instead).
   static List<double> hueAdjustMatrix({required double value}) {
     value = value * pi;
 
-    if (value == 0)
-      return [
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-      ];
+    final double cosVal = cos(value);
+    final double sinVal = sin(value);
+    const double lumR = 0.213;
+    const double lumG = 0.715;
+    const double lumB = 0.072;
 
-    double cosVal = cos(value);
-    double sinVal = sin(value);
-    double lumR = 0.213;
-    double lumG = 0.715;
-    double lumB = 0.072;
-
-    return List<double>.from(<double>[
+    return <double>[
       (lumR + (cosVal * (1 - lumR))) + (sinVal * (-lumR)),
       (lumG + (cosVal * (-lumG))) + (sinVal * (-lumG)),
       (lumB + (cosVal * (-lumB))) + (sinVal * (1 - lumB)),
@@ -582,7 +627,7 @@ class _ColorFilterGenerator {
       0,
       1,
       0,
-    ]).map((i) => i.toDouble()).toList();
+    ];
   }
 
   /// Changes the contrast, and makes dark and light colors fade at different
@@ -643,94 +688,28 @@ class _ColorFilterGenerator {
     ];
   }
 
+  /// Note: The [value] can't be zero (use no filter instead).
   static List<double> brightnessAdjustMatrix({required double value}) {
-    if (value <= 0)
-      value = value * 255;
-    else
-      value = value * 100;
+    value = (value <= 0) ? (value * 255) : (value * 100);
 
-    if (value == 0)
-      return [
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-      ];
-
-    return List<double>.from(<double>[
-      1,
-      0,
-      0,
-      0,
-      value,
-      0,
-      1,
-      0,
-      0,
-      value,
-      0,
-      0,
-      1,
-      0,
-      value,
-      0,
-      0,
-      0,
-      1,
-      0
-    ]).map((i) => i.toDouble()).toList();
+    return <double>[
+      1, 0, 0, 0, value, //
+      0, 1, 0, 0, value, //
+      0, 0, 1, 0, value, //
+      0, 0, 0, 1, 0, //
+    ];
   }
 
+  /// Note: The [value] can't be zero (use no filter instead).
   static List<double> saturationAdjustMatrix({required double value}) {
     value = value * 100;
 
-    if (value == 0)
-      return [
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        0,
-      ];
+    final double x = 1 + ((value > 0) ? ((3 * value) / 100) : (value / 100));
+    const double lumR = 0.3086;
+    const double lumG = 0.6094;
+    const double lumB = 0.082;
 
-    double x =
-        ((1 + ((value > 0) ? ((3 * value) / 100) : (value / 100)))).toDouble();
-    double lumR = 0.3086;
-    double lumG = 0.6094;
-    double lumB = 0.082;
-
-    return List<double>.from(<double>[
+    return <double>[
       (lumR * (1 - x)) + x,
       lumG * (1 - x),
       lumB * (1 - x),
@@ -751,6 +730,28 @@ class _ColorFilterGenerator {
       0,
       1,
       0,
-    ]).map((i) => i.toDouble()).toList();
+    ];
+  }
+
+  /// Returns a single matrix that does the same as applying the [first]
+  /// matrix, and then applying the [second] matrix to its result.
+  ///
+  /// Note: This is only the same if the [first] matrix always results in valid
+  /// colors, because the color filters clamp their results to the valid range.
+  static List<double> concat(List<double> first, List<double> second) {
+    final result = List<double>.filled(20, 0.0);
+
+    for (int row = 0; row < 20; row += 5) {
+      for (int column = 0; column < 5; column++) {
+        // The offset of the second matrix is applied only once (last column).
+        double sum = (column == 4) ? second[row + 4] : 0.0;
+
+        for (int i = 0; i < 4; i++) {
+          sum += second[row + i] * first[i * 5 + column];
+        }
+        result[row + column] = sum;
+      }
+    }
+    return result;
   }
 }

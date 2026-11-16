@@ -2,6 +2,47 @@ Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
+## 8.4.1
+
+* Performance improvements. There are no API changes:
+
+  * `AnimatedChangeColors` is a lot faster to create and to dispose. Its
+    animation controllers are now only created for the values that actually
+    animate, when they animate for the first time.
+
+  * `ChangeColors` and `AnimatedChangeColors` now use fewer widgets and render
+    objects, so they are faster to create, rebuild, layout and paint.
+
+  * When `ChangeColors` removes saturation (a negative `saturation`, or
+    `ChangeColors.greyscale`) together with a change in brightness, contrast, or
+    with the `opacityFactor`, they now share a single layer, instead of using
+    one layer each. The result is the same, but it's faster to draw. This is the
+    case of making a button look disabled, as shown in the README.
+
+  * The `Color` extension methods (`lighter`, `darker`, `average`, `decolorize`,
+    `addOpacity` and `removeOpacity`) are faster, especially when used with theme
+    colors (`ColorRef`).
+
+  * Theme colors (`ColorRef`) are a lot faster to read and to paint. Their
+    current value is now cached until the themes change. The cache is not used
+    while there is a color transform, and its size is limited.
+
+  * `ColorRef.shadesOfGreyTransform` is faster. This makes all theme colors
+    faster to read and paint, when this transform is in use.
+
+  * Comparing two different `ColorRef`s is faster, and `Themed.ifCurrentThemeIs`
+    no longer copies the given theme.
+
+* Fix: `MaterialColorSwatch` and `MaterialAccentColorSwatch` were painted as
+  transparent, when used directly as a color (and not through one of their
+  shades).
+
+* Fix: Comparing a `ColorRef` with a different one doesn't throw anymore, when
+  one of them is not defined in the theme.
+
+* The `pubspec.yaml` now asks for Flutter 3.27.0 or newer. This was already the
+  minimum version for version 8 and up (see below), but it was not declared.
+
 ## 8.4.0
 
 * `ChangeColors` and `AnimatedChangeColors` now skip compositing layers for

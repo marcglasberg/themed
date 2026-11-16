@@ -27,6 +27,21 @@ class MaterialColorSwatch extends MaterialColor {
 
   @override
   int get value => primary.value;
+
+  // Note: Flutter paints colors by reading their channels (and not their value),
+  // so the channels must also come from the primary color.
+
+  @override
+  double get a => ((value >> 24) & 0xFF) / 255.0;
+
+  @override
+  double get r => ((value >> 16) & 0xFF) / 255.0;
+
+  @override
+  double get g => ((value >> 8) & 0xFF) / 255.0;
+
+  @override
+  double get b => (value & 0xFF) / 255.0;
 }
 
 /// You can create a [MaterialAccentColorSwatch] color swatch from a
@@ -52,4 +67,19 @@ class MaterialAccentColorSwatch extends MaterialAccentColor {
 
   @override
   int get value => primary.value;
+
+  // Note: Flutter paints colors by reading their channels (and not their value),
+  // so the channels must also come from the primary color.
+
+  @override
+  double get a => ((value >> 24) & 0xFF) / 255.0;
+
+  @override
+  double get r => ((value >> 16) & 0xFF) / 255.0;
+
+  @override
+  double get g => ((value >> 8) & 0xFF) / 255.0;
+
+  @override
+  double get b => (value & 0xFF) / 255.0;
 }

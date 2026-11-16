@@ -225,6 +225,110 @@ void main() {
       expect(pixels[0][3], lessThanOrEqualTo(0.25 * 255 + 1));
       expect(pixels[1][3], closeTo(0.5 * 255, 1)); // White is exact.
     });
+
+    // When the saturation is removed, its matrix is joined with the matrix of
+    // the next filter, so that both use a single layer. Here we check that this
+    // renders the same as applying the two filters one after the other.
+    testWidgets('Joined filters render the same as separate filters.',
+        (tester) async {
+      const colors = [
+        black,
+        white,
+        grey,
+        Color(0xFF3366CC),
+        Color(0xFFCC3311),
+        Color(0xFF10E040),
+        Color(0xFFFFEE22),
+        Color(0x803366CC),
+        Color(0x80FFEE22),
+      ];
+
+      // Each case has all filters in a single widget (which joins them),
+      // and then the same filters in separate widgets (which can't join them).
+      final cases = <String,
+          (ChangeColors Function(Widget), ChangeColors Function(Widget))>{
+        'Saturation and contrast': (
+          (child) => ChangeColors(
+              saturation: -1,
+              contrast: -0.6,
+              contrastCenter: 0.85,
+              child: child),
+          (child) => ChangeColors(
+              contrast: -0.6,
+              contrastCenter: 0.85,
+              child: ChangeColors(saturation: -1, child: child)),
+        ),
+        'Saturation and higher contrast': (
+          (child) => ChangeColors(saturation: -0.7, contrast: 1, child: child),
+          (child) => ChangeColors(
+              contrast: 1, child: ChangeColors(saturation: -0.7, child: child)),
+        ),
+        'Saturation and higher brightness': (
+          (child) =>
+              ChangeColors(saturation: -0.5, brightness: 0.2, child: child),
+          (child) => ChangeColors(
+              brightness: 0.2,
+              child: ChangeColors(saturation: -0.5, child: child)),
+        ),
+        'Saturation and lower brightness': (
+          (child) => ChangeColors.greyscale(brightness: -0.3, child: child),
+          (child) => ChangeColors(
+              brightness: -0.3, child: ChangeColors.greyscale(child: child)),
+        ),
+        'Saturation and opacity factor': (
+          (child) => ChangeColors(
+              saturation: -1, opacity: 0.3, opacityFactor: 0.3, child: child),
+          (child) => ChangeColors(
+              opacity: 0.3,
+              opacityFactor: 0.3,
+              child: ChangeColors(saturation: -1, child: child)),
+        ),
+        'All filters': (
+          (child) => ChangeColors(
+              hue: 0.4,
+              saturation: -0.5,
+              brightness: 0.2,
+              contrast: -0.4,
+              child: child),
+          (child) => ChangeColors(
+              contrast: -0.4,
+              child: ChangeColors(
+                  brightness: 0.2,
+                  child: ChangeColors(
+                      saturation: -0.5,
+                      child: ChangeColors(hue: 0.4, child: child)))),
+        ),
+      };
+
+      // The pixel as it's blended into the screen (colors multiplied by alpha).
+      // That's how it's stored, so that's where the rounding happens.
+      List<double> premultiplied(List<int> pixel) => [
+            for (int channel = 0; channel < 3; channel++)
+              pixel[channel] * pixel[3] / 255,
+            pixel[3].toDouble(),
+          ];
+
+      for (final MapEntry(key: name, value: (joined, separate))
+          in cases.entries) {
+        final joinedPixels = await render(tester, colors, joined);
+        final separatePixels = await render(tester, colors, separate);
+
+        for (int i = 0; i < colors.length; i++) {
+          final joinedPixel = premultiplied(joinedPixels[i]);
+          final separatePixel = premultiplied(separatePixels[i]);
+
+          for (int channel = 0; channel < 4; channel++) {
+            // The only difference is rounding to 8 bits one less time.
+            expect(
+              joinedPixel[channel],
+              closeTo(separatePixel[channel], 2),
+              reason: '$name: ${colors[i]}, channel $channel, '
+                  'joined ${joinedPixels[i]}, separate ${separatePixels[i]}.',
+            );
+          }
+        }
+      }
+    });
   });
 
   testWidgets('AnimatedChangeColors animates the new values.', (tester) async {
