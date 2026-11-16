@@ -2,6 +2,14 @@ Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
 
+## 8.4.0
+
+* `ChangeColors` and `AnimatedChangeColors` now skip compositing layers for
+  neutral color adjustments, including the default values. Active filters keep
+  their original order and behavior.
+* Preserve child state and focus when filters turn on or off, including during
+  animations. Public APIs and animation curves and durations are unchanged.
+
 ## 8.3.1
 
 * `ChangeColors` and `AnimatedChangeColors` now accept a `contrast` parameter.

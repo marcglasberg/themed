@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 // Based upon: https://stackoverflow.com/questions/64639589/how-to-adjust-hue-saturation-and-brightness-of-an-image-in-flutter
 // from BananaNeil: https://stackoverflow.com/users/937841/banananeil.
@@ -211,33 +212,92 @@ class ChangeColors extends StatelessWidget {
     // so that the child is not painted.
     final bool useOpacityWidget = (opacityFactor == 1.0) || (opacity == 0.0);
 
-    // The widget tree is always the same, whatever the values,
-    // so that the child state is kept when the values change.
+    // Keep every element in place so toggling a filter never remounts the child.
+    // Neutral filters bypass compositing instead of adding identity filter layers.
+    final matrixOpacity = useOpacityWidget ? 1.0 : opacity;
     return Opacity(
       opacity: useOpacityWidget ? opacity : 1.0,
-      child: ColorFiltered(
-        colorFilter: ColorFilter.matrix(_ColorFilterGenerator.contrastAndOpacityMatrix(
-          contrast: contrast,
-          contrastCenter: contrastCenter,
-          opacity: useOpacityWidget ? 1.0 : opacity,
-          opacityFactor: opacityFactor,
-        )),
-        child: ColorFiltered(
-            colorFilter: ColorFilter.matrix(_ColorFilterGenerator.brightnessAdjustMatrix(
-              value: brightness,
-            )),
-            child: ColorFiltered(
-                colorFilter: ColorFilter.matrix(_ColorFilterGenerator.saturationAdjustMatrix(
-                  value: saturation,
-                )),
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.matrix(_ColorFilterGenerator.hueAdjustMatrix(
-                    value: hue,
-                  )),
-                  child: child,
-                ))),
+      child: _OptionalColorFilter(
+        colorFilter: contrast == 0.0 && matrixOpacity == 1.0
+            ? null
+            : ColorFilter.matrix(_ColorFilterGenerator.contrastAndOpacityMatrix(
+                contrast: contrast,
+                contrastCenter: contrastCenter,
+                opacity: matrixOpacity,
+                opacityFactor: opacityFactor,
+              )),
+        child: _OptionalColorFilter(
+          colorFilter: brightness == 0.0
+              ? null
+              : ColorFilter.matrix(_ColorFilterGenerator.brightnessAdjustMatrix(
+                  value: brightness)),
+          child: _OptionalColorFilter(
+            colorFilter: saturation == 0.0
+                ? null
+                : ColorFilter.matrix(
+                    _ColorFilterGenerator.saturationAdjustMatrix(
+                        value: saturation)),
+            child: _OptionalColorFilter(
+              colorFilter: hue == 0.0
+                  ? null
+                  : ColorFilter.matrix(
+                      _ColorFilterGenerator.hueAdjustMatrix(value: hue)),
+              child: child,
+            ),
+          ),
+        ),
       ),
     );
+  }
+}
+
+/// A stable element whose render object only composites an active filter.
+class _OptionalColorFilter extends SingleChildRenderObjectWidget {
+  const _OptionalColorFilter({required this.colorFilter, required super.child});
+
+  final ColorFilter? colorFilter;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderOptionalColorFilter(colorFilter);
+
+  @override
+  void updateRenderObject(
+      BuildContext context, covariant _RenderOptionalColorFilter renderObject) {
+    renderObject.colorFilter = colorFilter;
+  }
+}
+
+class _RenderOptionalColorFilter extends RenderProxyBox {
+  _RenderOptionalColorFilter(this._colorFilter);
+
+  ColorFilter? _colorFilter;
+
+  set colorFilter(ColorFilter? value) {
+    if (_colorFilter == value) return;
+    final wasEnabled = _colorFilter != null;
+    _colorFilter = value;
+    if (wasEnabled != (value != null)) markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => child != null && _colorFilter != null;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final filter = _colorFilter;
+    if (filter == null) {
+      layer = null;
+      super.paint(context, offset);
+    } else {
+      layer = context.pushColorFilter(
+        offset,
+        filter,
+        super.paint,
+        oldLayer: layer as ColorFilterLayer?,
+      );
+    }
   }
 }
 
@@ -466,8 +526,6 @@ class _AnimatedValue {
   void dispose() => controller.dispose();
 }
 
-
-
 class _ColorFilterGenerator {
   //
   static List<double> hueAdjustMatrix({required double value}) {
@@ -546,7 +604,8 @@ class _ColorFilterGenerator {
       darkOpacity = lightOpacity = 0.0;
     } else if (opacityFactor <= 1.0) {
       darkOpacity = opacity;
-      lightOpacity = (opacityFactor == 0.0) ? 1.0 : min(1.0, opacity / opacityFactor);
+      lightOpacity =
+          (opacityFactor == 0.0) ? 1.0 : min(1.0, opacity / opacityFactor);
     } else {
       lightOpacity = opacity;
       darkOpacity = min(1.0, opacity * opacityFactor);
@@ -563,7 +622,13 @@ class _ColorFilterGenerator {
     if (lightOpacity >= darkOpacity) {
       // alpha' = lightOpacity * alpha - delta * (1 - luminance)
       final double delta = lightOpacity - darkOpacity;
-      alphaRow = [delta * lumR, delta * lumG, delta * lumB, lightOpacity, -delta * 255];
+      alphaRow = [
+        delta * lumR,
+        delta * lumG,
+        delta * lumB,
+        lightOpacity,
+        -delta * 255
+      ];
     } else {
       // alpha' = darkOpacity * alpha - delta * luminance
       final double delta = darkOpacity - lightOpacity;
@@ -608,10 +673,28 @@ class _ColorFilterGenerator {
         0,
       ];
 
-    return List<double>.from(
-            <double>[1, 0, 0, 0, value, 0, 1, 0, 0, value, 0, 0, 1, 0, value, 0, 0, 0, 1, 0])
-        .map((i) => i.toDouble())
-        .toList();
+    return List<double>.from(<double>[
+      1,
+      0,
+      0,
+      0,
+      value,
+      0,
+      1,
+      0,
+      0,
+      value,
+      0,
+      0,
+      1,
+      0,
+      value,
+      0,
+      0,
+      0,
+      1,
+      0
+    ]).map((i) => i.toDouble()).toList();
   }
 
   static List<double> saturationAdjustMatrix({required double value}) {
@@ -641,7 +724,8 @@ class _ColorFilterGenerator {
         0,
       ];
 
-    double x = ((1 + ((value > 0) ? ((3 * value) / 100) : (value / 100)))).toDouble();
+    double x =
+        ((1 + ((value > 0) ? ((3 * value) / 100) : (value / 100)))).toDouble();
     double lumR = 0.3086;
     double lumG = 0.6094;
     double lumB = 0.082;

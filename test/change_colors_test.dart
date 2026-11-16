@@ -38,11 +38,13 @@ void main() {
   });
 
   testWidgets('ChangeColors applies the opacity.', (tester) async {
-    await tester.pumpWidget(ChangeColors(opacity: 0.4, child: const SizedBox()));
+    await tester
+        .pumpWidget(ChangeColors(opacity: 0.4, child: const SizedBox()));
     expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 0.4);
   });
 
-  test('ChangeColors clamps the contrast, contrastCenter and opacityFactor.', () {
+  test('ChangeColors clamps the contrast, contrastCenter and opacityFactor.',
+      () {
     const child = SizedBox();
     expect(ChangeColors(child: child).contrast, 0.0);
     expect(ChangeColors(child: child).contrastCenter, 0.5);
@@ -56,29 +58,26 @@ void main() {
     expect(ChangeColors.greyscale(contrast: -0.5, child: child).contrast, -0.5);
   });
 
-  testWidgets('ChangeColors defaults add an identity color matrix.', (tester) async {
-    await tester.pumpWidget(ChangeColors(opacity: 0.4, child: const SizedBox()));
+  testWidgets('ChangeColors with only opacity adds no color filter layers.',
+      (tester) async {
+    await tester.pumpWidget(ChangeColors(
+      opacity: 0.4,
+      child: const ColoredBox(color: Colors.red),
+    ));
     expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 0.4);
-    final outer = tester.widgetList<ColorFiltered>(find.byType(ColorFiltered)).first;
-    expect(
-        outer.colorFilter,
-        const ColorFilter.matrix(<double>[
-          1, 0, 0, 0, 0, //
-          0, 1, 0, 0, 0, //
-          0, 0, 1, 0, 0, //
-          0, 0, 0, 1, 0, //
-        ]));
+    expect(tester.layers.whereType<ColorFilterLayer>(), isEmpty);
   });
 
-  testWidgets('ChangeColors moves the opacity to the matrix when using opacityFactor.',
+  testWidgets(
+      'ChangeColors moves the opacity to the matrix when using opacityFactor.',
       (tester) async {
-    await tester.pumpWidget(
-        ChangeColors(opacity: 0.4, opacityFactor: 0.5, child: const SizedBox()));
+    await tester.pumpWidget(ChangeColors(
+        opacity: 0.4, opacityFactor: 0.5, child: const SizedBox()));
     expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 1.0);
 
     // Opacity 0 still uses the Opacity widget, so the child is not painted.
-    await tester.pumpWidget(
-        ChangeColors(opacity: 0.0, opacityFactor: 0.5, child: const SizedBox()));
+    await tester.pumpWidget(ChangeColors(
+        opacity: 0.0, opacityFactor: 0.5, child: const SizedBox()));
     expect(tester.widget<Opacity>(find.byType(Opacity)).opacity, 0.0);
   });
 
@@ -98,16 +97,19 @@ void main() {
             mainAxisSize: MainAxisSize.min,
             textDirection: TextDirection.ltr,
             children: [
-              for (final color in colors) Container(width: 1, height: 1, color: color),
+              for (final color in colors)
+                Container(width: 1, height: 1, color: color),
             ],
           )),
         ),
       ));
 
-      final boundary = key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final boundary =
+          key.currentContext!.findRenderObject() as RenderRepaintBoundary;
       final bytes = (await tester.runAsync(() async {
         final image = await boundary.toImage();
-        final data = await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
+        final data =
+            await image.toByteData(format: ui.ImageByteFormat.rawStraightRgba);
         image.dispose();
         return data!;
       }))!;
@@ -123,7 +125,9 @@ void main() {
     const grey = Color(0xFF808080); // Luminance ~0.5.
 
     testWidgets('Default values change nothing.', (tester) async {
-      final pixels = await render(tester, [black, white, grey, const Color(0xFF3366CC)],
+      final pixels = await render(
+          tester,
+          [black, white, grey, const Color(0xFF3366CC)],
           (child) => ChangeColors(child: child));
       expect(pixels, [
         [0, 0, 0, 255],
@@ -133,61 +137,90 @@ void main() {
       ]);
     });
 
-    testWidgets('Contrast -1 turns everything into the center grey.', (tester) async {
-      final pixels = await render(tester, [black, white],
-          (child) => ChangeColors(contrast: -1, contrastCenter: 0.8, child: child));
+    testWidgets('Contrast -1 turns everything into the center grey.',
+        (tester) async {
+      final pixels = await render(
+          tester,
+          [black, white],
+          (child) =>
+              ChangeColors(contrast: -1, contrastCenter: 0.8, child: child));
       expect(pixels[0], [204, 204, 204, 255]);
       expect(pixels[1], [204, 204, 204, 255]);
     });
 
-    testWidgets('Contrast -0.5 goes half way to the center grey.', (tester) async {
-      final pixels = await render(tester, [black, white],
-          (child) => ChangeColors(contrast: -0.5, contrastCenter: 0.5, child: child));
+    testWidgets('Contrast -0.5 goes half way to the center grey.',
+        (tester) async {
+      final pixels = await render(
+          tester,
+          [black, white],
+          (child) =>
+              ChangeColors(contrast: -0.5, contrastCenter: 0.5, child: child));
       expect(pixels[0][0], closeTo(64, 1));
       expect(pixels[1][0], closeTo(191, 1));
     });
 
     testWidgets('Contrast 1 doubles the contrast.', (tester) async {
-      final pixels = await render(tester, [const Color(0xFF606060), const Color(0xFFA0A0A0)],
+      final pixels = await render(
+          tester,
+          [const Color(0xFF606060), const Color(0xFFA0A0A0)],
           (child) => ChangeColors(contrast: 1, child: child));
       // 0x60 = 96 -> 2 * 96 - 127.5 = 64.5. And 0xA0 = 160 -> 2 * 160 - 127.5 = 192.5.
       expect(pixels[0][0], closeTo(64.5, 1));
       expect(pixels[1][0], closeTo(192.5, 1));
     });
 
-    testWidgets('opacityFactor below 1 makes dark colors fade faster.', (tester) async {
-      final pixels = await render(tester, [black, white, grey],
-          (child) => ChangeColors(opacity: 0.2, opacityFactor: 0.5, child: child));
+    testWidgets('opacityFactor below 1 makes dark colors fade faster.',
+        (tester) async {
+      final pixels = await render(
+          tester,
+          [black, white, grey],
+          (child) =>
+              ChangeColors(opacity: 0.2, opacityFactor: 0.5, child: child));
       expect(pixels[0][3], closeTo(0.2 * 255, 1)); // Black.
       expect(pixels[1][3], closeTo(0.4 * 255, 1)); // White.
       expect(pixels[2][3], closeTo(0.3 * 255, 1)); // Grey.
     });
 
-    testWidgets('opacityFactor above 1 makes light colors fade faster.', (tester) async {
-      final pixels = await render(tester, [black, white, grey],
-          (child) => ChangeColors(opacity: 0.2, opacityFactor: 2, child: child));
+    testWidgets('opacityFactor above 1 makes light colors fade faster.',
+        (tester) async {
+      final pixels = await render(
+          tester,
+          [black, white, grey],
+          (child) =>
+              ChangeColors(opacity: 0.2, opacityFactor: 2, child: child));
       expect(pixels[0][3], closeTo(0.4 * 255, 1)); // Black.
       expect(pixels[1][3], closeTo(0.2 * 255, 1)); // White.
       expect(pixels[2][3], closeTo(0.3 * 255, 1)); // Grey.
     });
 
     testWidgets('opacityFactor never goes above fully opaque.', (tester) async {
-      final pixels = await render(tester, [black, white],
-          (child) => ChangeColors(opacity: 0.8, opacityFactor: 0.5, child: child));
+      final pixels = await render(
+          tester,
+          [black, white],
+          (child) =>
+              ChangeColors(opacity: 0.8, opacityFactor: 0.5, child: child));
       expect(pixels[0][3], closeTo(0.8 * 255, 1));
       expect(pixels[1][3], 255);
     });
 
-    testWidgets('opacityFactor keeps transparent pixels transparent.', (tester) async {
-      final pixels = await render(tester, [const Color(0x00000000), const Color(0x00FFFFFF)],
-          (child) => ChangeColors(opacity: 0.5, opacityFactor: 0.1, child: child));
+    testWidgets('opacityFactor keeps transparent pixels transparent.',
+        (tester) async {
+      final pixels = await render(
+          tester,
+          [const Color(0x00000000), const Color(0x00FFFFFF)],
+          (child) =>
+              ChangeColors(opacity: 0.5, opacityFactor: 0.1, child: child));
       expect(pixels[0][3], 0);
       expect(pixels[1][3], 0);
     });
 
-    testWidgets('opacityFactor never makes translucent pixels more opaque.', (tester) async {
-      final pixels = await render(tester, [const Color(0x80000000), const Color(0x80FFFFFF)],
-          (child) => ChangeColors(opacity: 0.5, opacityFactor: 0.5, child: child));
+    testWidgets('opacityFactor never makes translucent pixels more opaque.',
+        (tester) async {
+      final pixels = await render(
+          tester,
+          [const Color(0x80000000), const Color(0x80FFFFFF)],
+          (child) =>
+              ChangeColors(opacity: 0.5, opacityFactor: 0.5, child: child));
       // Ideal: black is 0.5 * 0.5, and white is 0.5 * 1.0.
       expect(pixels[0][3], lessThanOrEqualTo(0.25 * 255 + 1));
       expect(pixels[1][3], closeTo(0.5 * 255, 1)); // White is exact.
@@ -241,7 +274,8 @@ void main() {
   testWidgets('AnimatedChangeColors uses the raising curve and duration.',
       (tester) async {
     await tester.pumpWidget(animated(opacity: 0.0));
-    await tester.pumpWidget(animated(opacity: 1.0, raisingCurve: Curves.easeIn));
+    await tester
+        .pumpWidget(animated(opacity: 1.0, raisingCurve: Curves.easeIn));
 
     await tester.pump(const Duration(milliseconds: 50));
     expect(findChangeColors(tester).opacity,
