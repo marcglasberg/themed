@@ -1,8 +1,8 @@
 Sponsored by [MyText.ai](https://mytext.ai)
 
-[![](./example/SponsoredByMyTextAi.png)](https://mytext.ai)
+[![](./example/SponsoredByMyTextAi.jpg)](https://mytext.ai)
 
-## 8.4.1
+## 8.4.2
 
 * Performance improvements. There are no API changes:
 
