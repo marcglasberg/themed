@@ -27,6 +27,14 @@ The **Themed** package:
 * TextStyle extension methods: `var myStyle = TextStyle(fontSize: 15) + Colors.blue` and
   more.
 
+## Flutter 3.50 migration
+
+Version 9 requires Flutter 3.50 and Dart 3.14. Import Material types from
+`package:material_ui/material_ui.dart`. `MaterialColorSwatch` and
+`MaterialAccentColorSwatch` now extend that package's types. `TextStyleRef` forwards
+Flutter's `hyphens` paragraph option. Theme maps, colors and style composition keep
+their existing behavior.
+
 ## Const values that you can change
 
 As we all know, using const variables is the easiest way to create and use themes:

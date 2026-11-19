@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// You can create a [MaterialColor] color swatch from a single [primary]
 /// color (which you can later change using the Themed package):

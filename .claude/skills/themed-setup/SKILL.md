@@ -45,7 +45,7 @@ If so, incorporate them. If not, start with sensible defaults:
 Create the design system file with this structure (customize based on user answers):
 
 ```dart
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:themed/themed.dart';
 

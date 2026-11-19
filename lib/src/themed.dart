@@ -10,15 +10,14 @@ import 'dart:ui' as ui
         TextLeadingDistribution,
         FontVariation;
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:themed/src/const_theme_exception.dart';
 
 abstract class ThemeRef {}
 
 /// You must have a single [Themed] widget in your widget tree, above
-/// your [MaterialApp] or [CupertinoApp] widgets:
+/// your [MaterialApp] or `CupertinoApp` widgets:
 ///
 /// ```dart
 /// import 'package:themed/themed.dart';
@@ -69,7 +68,7 @@ class Themed extends StatefulWidget {
   static Object? _delayedThemeChangeByKey;
 
   /// You must have a single [Themed] widget in your widget tree, above
-  /// your [MaterialApp] or [CupertinoApp] widgets:
+  /// your [MaterialApp] or `CupertinoApp` widgets:
   ///
   /// ```dart
   /// import 'package:themed/themed.dart';
@@ -808,6 +807,7 @@ class TextStyleRef extends TextStyle implements ThemeRef {
     String? ellipsis,
     int? maxLines,
     ui.TextHeightBehavior? textHeightBehavior,
+    Hyphens? hyphens,
     Locale? locale,
     String? fontFamily,
     double? fontSize,
@@ -823,6 +823,7 @@ class TextStyleRef extends TextStyle implements ThemeRef {
       ellipsis: ellipsis,
       maxLines: maxLines,
       textHeightBehavior: textHeightBehavior,
+      hyphens: hyphens,
       locale: locale,
       fontFamily: fontFamily,
       fontSize: fontSize,

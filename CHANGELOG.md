@@ -2,6 +2,11 @@ Sponsored by [MyText.ai](https://mytext.ai)
 
 [![](./example/SponsoredByMyTextAi.jpg)](https://mytext.ai)
 
+## 9.0.0
+
+* **Breaking:** MaterialColorSwatch and MaterialAccentColorSwatch now extend the types from package:material_ui, instead of the Material library bundled with Flutter. Migrate consumer imports to package:material_ui/material_ui.dart.
+* Forward the new hyphens option from TextStyleRef.getParagraphStyle. Require Dart >=3.14.0 and Flutter >=3.50.0. Theme references, color values and style composition are unchanged.
+
 ## 8.4.2
 
 * Performance improvements. There are no API changes:
